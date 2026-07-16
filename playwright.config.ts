@@ -14,7 +14,13 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        // The pinned @playwright/test version expects a newer bundled
+        // browser revision than what's pre-installed in this environment;
+        // point at the pre-installed executable instead of downloading.
+        launchOptions: { executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" },
+      },
     },
   ],
   webServer: {
