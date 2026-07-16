@@ -1,4 +1,13 @@
+import { existsSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
+
+// This sandbox environment pre-installs a Chromium revision older than the
+// one this pinned @playwright/test version would try to download. Point at
+// it ONLY when it's actually present (this dev sandbox); everywhere else
+// (CI, a contributor's machine) fall back to Playwright's normal managed
+// browser, installed via `pnpm exec playwright install chromium`.
+const SANDBOX_CHROMIUM_PATH = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+const sandboxChromiumExecutable = existsSync(SANDBOX_CHROMIUM_PATH) ? SANDBOX_CHROMIUM_PATH : undefined;
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -16,10 +25,9 @@ export default defineConfig({
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
-        // The pinned @playwright/test version expects a newer bundled
-        // browser revision than what's pre-installed in this environment;
-        // point at the pre-installed executable instead of downloading.
-        launchOptions: { executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" },
+        launchOptions: sandboxChromiumExecutable
+          ? { executablePath: sandboxChromiumExecutable }
+          : {},
       },
     },
   ],
