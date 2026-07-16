@@ -3,8 +3,14 @@ import { z } from "zod";
 /**
  * All environment variables the app can use, validated once at import time.
  * Never read `process.env` directly anywhere else — import `env` from here.
- * Server-only secrets (SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, ...)
- * must never be re-exported to a Client Component.
+ *
+ * Exception: `SUPABASE_SERVICE_ROLE_KEY` is deliberately NOT parsed into
+ * this shared object. It is read only inside
+ * `src/lib/database/supabase/admin.ts`, directly from `process.env`, so
+ * that file is the single place in the codebase where that secret's name
+ * appears (enforced by tests/unit/no-service-key-leak.test.ts). Server-only
+ * secrets that ARE here (ANTHROPIC_API_KEY, ...) must never be re-exported
+ * to a Client Component.
  */
 const envSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
@@ -12,7 +18,6 @@ const envSchema = z.object({
 
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional().or(z.literal("")),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional().or(z.literal("")),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().optional().or(z.literal("")),
 
   ANTHROPIC_API_KEY: z.string().optional().or(z.literal("")),
   AI_MODEL: z.string().default("claude-sonnet-5"),
@@ -28,7 +33,6 @@ const parsed = envSchema.safeParse({
   NEXT_PUBLIC_DATA_MODE: process.env.NEXT_PUBLIC_DATA_MODE,
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   AI_MODEL: process.env.AI_MODEL,
   EMBEDDING_PROVIDER: process.env.EMBEDDING_PROVIDER,
