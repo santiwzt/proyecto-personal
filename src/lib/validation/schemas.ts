@@ -11,6 +11,19 @@ const isoDateTime = z.string().datetime({ offset: true });
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha invalida");
 const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Formato de hora invalido (HH:mm)");
 
+export const signUpSchema = z.object({
+  displayName: z.string().trim().min(1, "Ingresa tu nombre").max(60),
+  email: z.string().trim().toLowerCase().email("Email invalido"),
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres").max(72),
+});
+export type SignUpInput = z.infer<typeof signUpSchema>;
+
+export const signInSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Email invalido"),
+  password: z.string().min(1, "Ingresa tu contraseña"),
+});
+export type SignInInput = z.infer<typeof signInSchema>;
+
 export const subjectColorSchema = z.enum([
   "blue",
   "green",
