@@ -451,6 +451,16 @@ export interface AiUsageRecord {
   createdAt: ISODateTimeString;
 }
 
+/** A browser/device registered for Web Push notifications (see docs/decisions for the reminders design). */
+export interface PushSubscriptionRecord {
+  id: string;
+  userId: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  createdAt: ISODateTimeString;
+}
+
 export type QuickCaptureResult =
   | { type: "task"; data: Omit<Task, "id" | "userId" | "status" | "completedAt" | "createdAt"> }
   | { type: "exam"; data: Omit<Exam, "id" | "userId" | "status" | "fileIds" | "resultScore" | "resultNotes" | "createdAt"> }

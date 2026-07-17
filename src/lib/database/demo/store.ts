@@ -24,6 +24,7 @@ import type {
   Profile,
   Project,
   ProjectTask,
+  PushSubscriptionRecord,
   StudySession,
   StudyTopic,
   Subject,
@@ -63,6 +64,7 @@ export class DemoStore {
   readonly plannerRuns: InMemoryCollection<PlannerRun>;
   readonly activityLog: InMemoryCollection<ActivityLogEntry>;
   readonly aiUsage: InMemoryCollection<AiUsageRecord>;
+  readonly pushSubscriptions: InMemoryCollection<PushSubscriptionRecord>;
 
   /** practice_questions has no userId of its own — ownership flows through practiceSets. */
   private practiceQuestionsRaw: PracticeQuestion[];
@@ -95,6 +97,7 @@ export class DemoStore {
     this.plannerRuns = new InMemoryCollection<PlannerRun>([]);
     this.activityLog = new InMemoryCollection(seed.activityLog);
     this.aiUsage = new InMemoryCollection<AiUsageRecord>([]);
+    this.pushSubscriptions = new InMemoryCollection<PushSubscriptionRecord>([]);
     this.practiceQuestionsRaw = [...seed.practiceQuestions];
 
     this.profiles = new Map();

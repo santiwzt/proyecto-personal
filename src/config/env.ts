@@ -26,6 +26,11 @@ const envSchema = z.object({
 
   MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().default(20),
   AI_DAILY_REQUEST_LIMIT: z.coerce.number().int().positive().default(50),
+
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().optional().or(z.literal("")),
+  VAPID_PRIVATE_KEY: z.string().optional().or(z.literal("")),
+  VAPID_SUBJECT: z.string().default("mailto:notificaciones@nexo-personal-os.app"),
+  CRON_SECRET: z.string().optional().or(z.literal("")),
 });
 
 const parsed = envSchema.safeParse({
@@ -39,6 +44,10 @@ const parsed = envSchema.safeParse({
   EMBEDDING_API_KEY: process.env.EMBEDDING_API_KEY,
   MAX_UPLOAD_SIZE_MB: process.env.MAX_UPLOAD_SIZE_MB,
   AI_DAILY_REQUEST_LIMIT: process.env.AI_DAILY_REQUEST_LIMIT,
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
+  VAPID_SUBJECT: process.env.VAPID_SUBJECT,
+  CRON_SECRET: process.env.CRON_SECRET,
 });
 
 if (!parsed.success) {
@@ -53,3 +62,4 @@ export const isSupabaseConfigured =
   !!env.NEXT_PUBLIC_SUPABASE_URL &&
   !!env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 export const isAiConfigured = !!env.ANTHROPIC_API_KEY;
+export const isPushConfigured = !!env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && !!env.VAPID_PRIVATE_KEY;

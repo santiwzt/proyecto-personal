@@ -9,9 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const user = await getSessionUser();
   if (user) redirect("/hoy");
+  const { error } = await searchParams;
 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-muted/30 p-4">
@@ -24,6 +29,11 @@ export default async function LoginPage() {
           <CardDescription>{appConfig.description}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          {error === "confirmacion_invalida" && (
+            <p className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-center text-sm text-destructive">
+              El link de confirmacion no es valido o ya vencio. Proba crear la cuenta de nuevo o pedir otro email.
+            </p>
+          )}
           {isDemoMode ? (
             <>
               <Badge variant="secondary" className="mx-auto">

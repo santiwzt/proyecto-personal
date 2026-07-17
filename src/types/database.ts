@@ -866,6 +866,27 @@ export interface AiUsageTable {
   Relationships: [];
 }
 
+export interface PushSubscriptionsTable {
+  Row: {
+    id: string;
+    user_id: string;
+    endpoint: string;
+    p256dh: string;
+    auth: string;
+    created_at: string;
+  };
+  Insert: {
+    id?: string;
+    user_id: string;
+    endpoint: string;
+    p256dh: string;
+    auth: string;
+    created_at?: string;
+  };
+  Update: Partial<PushSubscriptionsTable["Insert"]>;
+  Relationships: [];
+}
+
 // ---------------------------------------------------------------------------
 // Database root type, in the shape `@supabase/supabase-js` /
 // `@supabase/ssr`'s generic clients expect.
@@ -901,6 +922,7 @@ export interface Database {
       proposed_time_blocks: ProposedTimeBlocksTable;
       activity_log: ActivityLogTable;
       ai_usage: AiUsageTable;
+      push_subscriptions: PushSubscriptionsTable;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

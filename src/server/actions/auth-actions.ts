@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { isDemoMode, isSupabaseConfigured } from "@/config/env";
+import { env, isDemoMode, isSupabaseConfigured } from "@/config/env";
 import { DEMO_SESSION_COOKIE } from "@/lib/auth/session";
 import { DEMO_USER_ID } from "@/lib/database/demo/ids";
 import { AppError } from "@/lib/errors/app-error";
@@ -59,7 +59,10 @@ export async function signUpAction(input: SignUpInput): Promise<SignUpResult> {
   const { data, error } = await supabase.auth.signUp({
     email: parsed.email,
     password: parsed.password,
-    options: { data: { display_name: parsed.displayName } },
+    options: {
+      data: { display_name: parsed.displayName },
+      emailRedirectTo: `${env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
+    },
   });
 
   if (error) {

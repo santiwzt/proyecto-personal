@@ -3,7 +3,7 @@ import { LogOut } from "lucide-react";
 import { requireSessionUser } from "@/lib/auth/session";
 import { profileRepository, preferencesRepository } from "@/server/repositories/profile-repository";
 import { appConfig } from "@/config/app";
-import { isAiConfigured, isDemoMode } from "@/config/env";
+import { env, isAiConfigured, isDemoMode } from "@/config/env";
 import { endSession } from "@/server/actions/auth-actions";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { PreferencesForm } from "@/features/settings/preferences-form";
+import { PushNotificationsToggle } from "@/features/settings/push-notifications-toggle";
 
 const ROLE_LABELS: Record<string, string> = {
   estudiante_secundario: "Estudiante secundario",
@@ -77,6 +78,15 @@ export default async function ConfiguracionPage() {
             <p className="text-xs text-muted-foreground">
               El tema claro/oscuro se controla desde el selector en la barra lateral.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-base">Notificaciones</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PushNotificationsToggle vapidPublicKey={env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || null} />
           </CardContent>
         </Card>
 
