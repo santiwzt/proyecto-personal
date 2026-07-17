@@ -34,7 +34,7 @@ test.describe("files, practice questions and assistant chat", () => {
     await page.getByLabel(/materia \(opcional\)/i).click();
     await page.getByRole("option", { name: subjectName }).click();
     await page.getByRole("button", { name: /^subir$/i }).click();
-    await expect(page.getByText(/archivo subido/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/archivo subido/i).first()).toBeVisible({ timeout: 15_000 });
     const fileRow = page.locator("main li").filter({ hasText: "sample-material.txt" });
     await expect(fileRow).toBeVisible({ timeout: 15_000 });
     await expect(fileRow.getByText(/^listo$/i)).toBeVisible({ timeout: 15_000 });

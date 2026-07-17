@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AlertTriangle, BookOpen, CalendarClock, CheckCircle2, Clock, Sparkles } from "lucide-react";
+import { AlertTriangle, BookOpen, CalendarClock, CheckCircle2, Clock } from "lucide-react";
 import { requireSessionUser } from "@/lib/auth/session";
 import { profileRepository } from "@/server/repositories/profile-repository";
 import {
@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/shared/empty-state";
+import { GettingStartedChecklist } from "@/components/shared/getting-started-checklist";
 
 export default async function HoyPage() {
   const user = await requireSessionUser();
@@ -98,11 +98,7 @@ export default async function HoyPage() {
       />
 
       {!hasAnyData ? (
-        <EmptyState
-          icon={Sparkles}
-          title="Todavia no tenes nada cargado"
-          description='Usa "Captura rapida" arriba para empezar a agregar materias, tareas o examenes.'
-        />
+        <GettingStartedChecklist />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           <Card>

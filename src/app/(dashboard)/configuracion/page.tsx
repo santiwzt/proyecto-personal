@@ -76,7 +76,7 @@ export default async function ConfiguracionPage() {
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              El tema claro/oscuro se controla desde el selector en la barra lateral.
+              El tema claro/oscuro se controla desde el icono de sol/luna en la barra de arriba.
             </p>
           </CardContent>
         </Card>

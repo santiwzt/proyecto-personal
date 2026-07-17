@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { LogOut, Search, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { LogOut, Search, Settings, Sparkles } from "lucide-react";
 
 import type { SessionUser } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,10 +50,12 @@ export function Topbar({ user, onQuickCapture, onSignOut }: TopbarProps) {
         </div>
       </form>
 
-      <Button type="button" size="sm" onClick={() => onQuickCapture?.()}>
+      <Button type="button" size="sm" aria-label="Captura rapida" onClick={() => onQuickCapture?.()}>
         <Sparkles aria-hidden="true" />
-        Captura rapida
+        <span className="hidden sm:inline">Captura rapida</span>
       </Button>
+
+      <ThemeToggle />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -69,6 +73,13 @@ export function Topbar({ user, onQuickCapture, onSignOut }: TopbarProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>{user.displayName}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/configuracion" className="flex items-center gap-2">
+              <Settings aria-hidden="true" />
+              Configuracion
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => onSignOut?.()}>
             <LogOut aria-hidden="true" />
