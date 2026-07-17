@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 
 export default async function OnboardingPage() {
   const user = await requireSessionUser();
-  const profile = profileRepository.get(user.userId);
+  const profile = await profileRepository.get(user.userId);
   if (profile?.onboardingCompletedAt) redirect("/hoy");
 
   return (

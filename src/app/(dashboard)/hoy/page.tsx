@@ -25,19 +25,19 @@ import { EmptyState } from "@/components/shared/empty-state";
 
 export default async function HoyPage() {
   const user = await requireSessionUser();
-  const profile = profileRepository.get(user.userId);
+  const profile = await profileRepository.get(user.userId);
   if (!profile?.onboardingCompletedAt) redirect("/onboarding");
 
   const now = new Date();
   const today = todayISODate(now);
 
-  const subjects = subjectsRepository.list(user.userId);
-  const tasks = tasksRepository.list(user.userId);
-  const exams = examsRepository.list(user.userId);
-  const events = eventsRepository.list(user.userId);
-  const availabilityRules = availabilityRepository.list(user.userId);
-  const studySessions = studySessionsRepository.list(user.userId);
-  const recentActivity = activityLogRepository.listRecent(user.userId, 5);
+  const subjects = await subjectsRepository.list(user.userId);
+  const tasks = await tasksRepository.list(user.userId);
+  const exams = await examsRepository.list(user.userId);
+  const events = await eventsRepository.list(user.userId);
+  const availabilityRules = await availabilityRepository.list(user.userId);
+  const studySessions = await studySessionsRepository.list(user.userId);
+  const recentActivity = await activityLogRepository.listRecent(user.userId, 5);
 
   const pendingTasks = tasks
     .filter((t) => deriveEffectiveTaskStatus(t, now) !== "completada")
@@ -76,6 +76,19 @@ export default async function HoyPage() {
   const dailyProgress = dueToday > 0 ? Math.round((completedToday / dueToday) * 100) : 100;
 
   const hasAnyData = subjects.length > 0 || tasks.length > 0 || exams.length > 0;
+
+  const upcomingExamsWithReadiness = [];
+  for (const exam of upcomingExams) {
+    const topics = await topicsRepository.listByIds(user.userId, exam.topicIds);
+    const readiness = computeExamReadiness({
+      exam,
+      topics,
+      attempts: [],
+      relatedTasks: tasks.filter((t) => t.subjectId === exam.subjectId),
+      now,
+    });
+    upcomingExamsWithReadiness.push({ exam, readiness });
+  }
 
   return (
     <div>
@@ -164,15 +177,7 @@ export default async function HoyPage() {
               {upcomingExams.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No tenes examenes programados.</p>
               ) : (
-                upcomingExams.map((exam) => {
-                  const topics = topicsRepository.listByIds(user.userId, exam.topicIds);
-                  const readiness = computeExamReadiness({
-                    exam,
-                    topics,
-                    attempts: [],
-                    relatedTasks: tasks.filter((t) => t.subjectId === exam.subjectId),
-                    now,
-                  });
+                upcomingExamsWithReadiness.map(({ exam, readiness }) => {
                   return (
                     <div key={exam.id} className="space-y-1">
                       <div className="flex items-center justify-between text-sm">

@@ -22,7 +22,7 @@ export async function startDemoSession(): Promise<void> {
     path: "/",
     maxAge: THIRTY_DAYS_SECONDS,
   });
-  const profile = profileRepository.get(DEMO_USER_ID);
+  const profile = await profileRepository.get(DEMO_USER_ID);
   redirect(profile?.onboardingCompletedAt ? "/hoy" : "/onboarding");
 }
 

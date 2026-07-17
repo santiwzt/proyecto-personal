@@ -11,8 +11,8 @@ import { FileRow } from "@/features/files/file-row";
 
 export default async function ArchivosPage() {
   const user = await requireSessionUser();
-  const files = filesRepository.list(user.userId);
-  const subjects = subjectsRepository.list(user.userId);
+  const files = await filesRepository.list(user.userId);
+  const subjects = await subjectsRepository.list(user.userId);
   const subjectNameById = new Map(subjects.map((s) => [s.id, s.name]));
 
   return (

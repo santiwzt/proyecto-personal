@@ -10,7 +10,7 @@ import type { Expense, UserPreferences } from "@/types/domain";
 export async function createExpenseAction(input: CreateExpenseInput): Promise<Expense> {
   const user = await requireSessionUser();
   const parsed = createExpenseSchema.parse(input);
-  const expense = expensesRepository.create(user.userId, parsed);
+  const expense = await expensesRepository.create(user.userId, parsed);
   revalidatePath("/gastos");
   return expense;
 }
@@ -19,7 +19,7 @@ export async function updatePreferencesAction(
   patch: Partial<Pick<UserPreferences, "theme" | "dailyStudyLimitMinutes" | "aiConsentGiven">>,
 ): Promise<UserPreferences> {
   const user = await requireSessionUser();
-  const updated = preferencesRepository.update(user.userId, patch);
+  const updated = await preferencesRepository.update(user.userId, patch);
   revalidatePath("/configuracion");
   return updated;
 }

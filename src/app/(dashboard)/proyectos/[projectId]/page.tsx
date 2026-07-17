@@ -27,13 +27,13 @@ export default async function ProjectDetailPage({
 
   let project: Project;
   try {
-    project = projectsRepository.get(user.userId, projectId);
+    project = await projectsRepository.get(user.userId, projectId);
   } catch (error) {
     if (isAppError(error) && error.code === "NOT_FOUND") notFound();
     throw error;
   }
 
-  const tasks = projectTasksRepository.listByProject(user.userId, projectId);
+  const tasks = await projectTasksRepository.listByProject(user.userId, projectId);
 
   return (
     <div>

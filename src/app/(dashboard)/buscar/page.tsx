@@ -29,11 +29,11 @@ export default async function BuscarPage({
   const results = query
     ? searchAll({
         query,
-        subjects: subjectsRepository.list(user.userId),
-        tasks: tasksRepository.list(user.userId),
-        exams: examsRepository.list(user.userId),
-        projects: projectsRepository.list(user.userId),
-        files: filesRepository.list(user.userId),
+        subjects: await subjectsRepository.list(user.userId),
+        tasks: await tasksRepository.list(user.userId),
+        exams: await examsRepository.list(user.userId),
+        projects: await projectsRepository.list(user.userId),
+        files: await filesRepository.list(user.userId),
       })
     : [];
 

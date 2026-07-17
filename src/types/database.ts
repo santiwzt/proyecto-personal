@@ -132,6 +132,7 @@ export interface ProfilesTable {
     created_at?: string;
   };
   Update: Partial<ProfilesTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface UserPreferencesTable {
@@ -156,6 +157,7 @@ export interface UserPreferencesTable {
     created_at?: string;
   };
   Update: Partial<UserPreferencesTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface SubjectsTable {
@@ -184,6 +186,7 @@ export interface SubjectsTable {
     archived_at?: string | null;
   };
   Update: Partial<SubjectsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface StudyTopicsTable {
@@ -216,6 +219,7 @@ export interface StudyTopicsTable {
     updated_at?: string;
   };
   Update: Partial<StudyTopicsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface ExamsTable {
@@ -252,6 +256,7 @@ export interface ExamsTable {
     updated_at?: string;
   };
   Update: Partial<ExamsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface TasksTable {
@@ -288,6 +293,7 @@ export interface TasksTable {
     updated_at?: string;
   };
   Update: Partial<TasksTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface EventsTable {
@@ -322,6 +328,7 @@ export interface EventsTable {
     created_at?: string;
   };
   Update: Partial<EventsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface AvailabilityRulesTable {
@@ -346,6 +353,7 @@ export interface AvailabilityRulesTable {
     created_at?: string;
   };
   Update: Partial<AvailabilityRulesTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface ProjectsTable {
@@ -380,6 +388,7 @@ export interface ProjectsTable {
     updated_at?: string;
   };
   Update: Partial<ProjectsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface ProjectTasksTable {
@@ -400,6 +409,7 @@ export interface ProjectTasksTable {
     created_at?: string;
   };
   Update: Partial<ProjectTasksTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface GoalsTable {
@@ -422,6 +432,7 @@ export interface GoalsTable {
     created_at?: string;
   };
   Update: Partial<GoalsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface HabitsTable {
@@ -442,6 +453,7 @@ export interface HabitsTable {
     archived_at?: string | null;
   };
   Update: Partial<HabitsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface HabitLogsTable {
@@ -460,6 +472,7 @@ export interface HabitLogsTable {
     completed?: boolean;
   };
   Update: Partial<HabitLogsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface TrainingSessionsTable {
@@ -480,6 +493,7 @@ export interface TrainingSessionsTable {
     notes?: string | null;
   };
   Update: Partial<TrainingSessionsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface ExpensesTable {
@@ -504,6 +518,7 @@ export interface ExpensesTable {
     created_at?: string;
   };
   Update: Partial<ExpensesTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface IdeasTable {
@@ -526,6 +541,7 @@ export interface IdeasTable {
     created_at?: string;
   };
   Update: Partial<IdeasTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface FilesTable {
@@ -564,6 +580,7 @@ export interface FilesTable {
     updated_at?: string;
   };
   Update: Partial<FilesTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface FileChunksTable {
@@ -590,6 +607,7 @@ export interface FileChunksTable {
     embedding?: number[] | null;
   };
   Update: Partial<FileChunksTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface ConversationsTable {
@@ -612,6 +630,7 @@ export interface ConversationsTable {
     created_at?: string;
   };
   Update: Partial<ConversationsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface MessagesTable {
@@ -634,6 +653,7 @@ export interface MessagesTable {
     created_at?: string;
   };
   Update: Partial<MessagesTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface PracticeSetsTable {
@@ -656,6 +676,7 @@ export interface PracticeSetsTable {
     created_at?: string;
   };
   Update: Partial<PracticeSetsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface PracticeQuestionsTable {
@@ -690,6 +711,7 @@ export interface PracticeQuestionsTable {
     created_at?: string;
   };
   Update: Partial<PracticeQuestionsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface PracticeAttemptsTable {
@@ -716,6 +738,7 @@ export interface PracticeAttemptsTable {
     created_at?: string;
   };
   Update: Partial<PracticeAttemptsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface StudySessionsTable {
@@ -740,6 +763,7 @@ export interface StudySessionsTable {
     completed?: boolean;
   };
   Update: Partial<StudySessionsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface PlannerRunsTable {
@@ -762,6 +786,7 @@ export interface PlannerRunsTable {
     created_at?: string;
   };
   Update: Partial<PlannerRunsTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface ProposedTimeBlocksTable {
@@ -794,6 +819,7 @@ export interface ProposedTimeBlocksTable {
     source_ref_type?: TimeBlockSourceRefTypeEnum | null;
   };
   Update: Partial<ProposedTimeBlocksTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface ActivityLogTable {
@@ -814,6 +840,7 @@ export interface ActivityLogTable {
     created_at?: string;
   };
   Update: Partial<ActivityLogTable["Insert"]>;
+  Relationships: [];
 }
 
 export interface AiUsageTable {
@@ -836,6 +863,7 @@ export interface AiUsageTable {
     created_at?: string;
   };
   Update: Partial<AiUsageTable["Insert"]>;
+  Relationships: [];
 }
 
 // ---------------------------------------------------------------------------

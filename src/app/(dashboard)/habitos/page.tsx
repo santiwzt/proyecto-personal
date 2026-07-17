@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default async function HabitosPage() {
   const user = await requireSessionUser();
-  const habits = habitsRepository.list(user.userId);
+  const habits = await habitsRepository.list(user.userId);
 
   return (
     <div>

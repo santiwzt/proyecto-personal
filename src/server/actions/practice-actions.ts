@@ -20,13 +20,13 @@ export async function generateQuestionsAction(
   const user = await requireSessionUser();
   const parsed = generateQuestionsSchema.parse(input);
 
-  const usedToday = aiUsageRepository.countToday(user.userId);
+  const usedToday = await aiUsageRepository.countToday(user.userId);
   if (usedToday >= env.AI_DAILY_REQUEST_LIMIT) {
     throw new AppError("LIMIT_EXCEEDED", "Alcanzaste el limite diario de solicitudes de IA.");
   }
 
-  const chunks = parsed.fileIds.length > 0 ? fileChunksRepository.listByFiles(user.userId, parsed.fileIds) : [];
-  const topic = parsed.topicId ? topicsRepository.get(user.userId, parsed.topicId) : null;
+  const chunks = parsed.fileIds.length > 0 ? await fileChunksRepository.listByFiles(user.userId, parsed.fileIds) : [];
+  const topic = parsed.topicId ? await topicsRepository.get(user.userId, parsed.topicId) : null;
 
   const { questions, generatedBy } = await generateQuestions({
     chunks,
@@ -43,15 +43,15 @@ export async function generateQuestionsAction(
     );
   }
 
-  const set = practiceRepository.createSet(user.userId, {
+  const set = await practiceRepository.createSet(user.userId, {
     subjectId: parsed.subjectId,
     topicId: parsed.topicId,
     title: topic ? `Practica: ${topic.name}` : "Practica",
     generatedBy,
   });
-  const created = questions.map((q) => practiceRepository.addQuestion({ ...q, setId: set.id }));
+  const created = await Promise.all(questions.map((q) => practiceRepository.addQuestion({ ...q, setId: set.id })));
 
-  aiUsageRepository.record(user.userId, {
+  await aiUsageRepository.record(user.userId, {
     feature: "questions",
     provider: generatedBy === "ia" ? "anthropic" : "heuristico",
     inputTokens: 0,
@@ -65,12 +65,12 @@ export async function generateQuestionsAction(
 export async function gradeAnswerAction(input: GradeAnswerInput): Promise<PracticeAttempt> {
   const user = await requireSessionUser();
   const parsed = gradeAnswerSchema.parse(input);
-  const question = practiceRepository.getQuestion(parsed.questionId);
+  const question = await practiceRepository.getQuestion(parsed.questionId);
 
-  const previousAttempts = practiceRepository.listAttemptsByQuestion(user.userId, parsed.questionId);
+  const previousAttempts = await practiceRepository.listAttemptsByQuestion(user.userId, parsed.questionId);
   const result = await gradeAnswer(question, parsed.answerText);
 
-  const attempt = practiceRepository.addAttempt(user.userId, {
+  const attempt = await practiceRepository.addAttempt(user.userId, {
     questionId: parsed.questionId,
     answerText: parsed.answerText,
     isCorrect: result.isCorrect,
@@ -79,14 +79,14 @@ export async function gradeAnswerAction(input: GradeAnswerInput): Promise<Practi
     attemptNumber: previousAttempts.length + 1,
   });
 
-  const set = practiceRepository.getSet(user.userId, question.setId);
+  const set = await practiceRepository.getSet(user.userId, question.setId);
   if (set.topicId) {
     const allAttempts = [...previousAttempts, attempt];
     const confidence = estimateTopicConfidence(allAttempts, true);
-    topicsRepository.markPracticed(user.userId, set.topicId, confidence);
+    await topicsRepository.markPracticed(user.userId, set.topicId, confidence);
   }
 
-  aiUsageRepository.record(user.userId, {
+  await aiUsageRepository.record(user.userId, {
     feature: "grading",
     provider: result.gradedBy === "ia" ? "anthropic" : "heuristico",
     inputTokens: 0,

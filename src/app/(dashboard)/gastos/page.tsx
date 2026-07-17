@@ -15,7 +15,7 @@ function formatAmount(amount: number, currency: string): string {
 
 export default async function GastosPage() {
   const user = await requireSessionUser();
-  const expenses = expensesRepository.list(user.userId);
+  const expenses = await expensesRepository.list(user.userId);
 
   const currentMonth = todayISODate().slice(0, 7); // "yyyy-MM"
   const expensesThisMonth = expenses.filter((e) => e.spentAt.startsWith(currentMonth));

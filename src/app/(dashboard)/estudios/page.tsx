@@ -13,19 +13,19 @@ import { cn } from "@/lib/utils";
 
 export default async function EstudiosPage() {
   const user = await requireSessionUser();
-  const subjects = subjectsRepository.list(user.userId);
+  const subjects = await subjectsRepository.list(user.userId);
 
-  const cards = subjects.map((subject) => {
-    const topics = topicsRepository.listBySubject(user.userId, subject.id);
+  const cards = [];
+  for (const subject of subjects) {
+    const topics = await topicsRepository.listBySubject(user.userId, subject.id);
     const masteredCount = topics.filter((t) => t.status === "dominado" || t.status === "practicando").length;
     const masteryPct = topics.length > 0 ? Math.round((masteredCount / topics.length) * 100) : 0;
-    const upcomingExam = examsRepository
-      .listBySubject(user.userId, subject.id)
+    const upcomingExam = (await examsRepository.listBySubject(user.userId, subject.id))
       .filter((e) => e.status === "programado")
       .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt))[0];
 
-    return { subject, topicsCount: topics.length, masteryPct, upcomingExam };
-  });
+    cards.push({ subject, topicsCount: topics.length, masteryPct, upcomingExam });
+  }
 
   return (
     <div>

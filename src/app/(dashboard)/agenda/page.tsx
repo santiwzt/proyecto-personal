@@ -62,16 +62,16 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
   const startIso = `${weekStartStr}T00:00:00-03:00`;
   const endIso = `${weekEndStr}T23:59:59-03:00`;
 
-  const allEvents = eventsRepository.list(user.userId);
-  const weekEvents = eventsRepository.listBetween(user.userId, startIso, endIso);
-  const allExams = examsRepository.list(user.userId);
+  const allEvents = await eventsRepository.list(user.userId);
+  const weekEvents = await eventsRepository.listBetween(user.userId, startIso, endIso);
+  const allExams = await examsRepository.list(user.userId);
   const weekExams = allExams.filter((e) => e.scheduledAt >= startIso && e.scheduledAt <= endIso);
-  const allTasks = tasksRepository.list(user.userId);
+  const allTasks = await tasksRepository.list(user.userId);
   const pendingTasks = allTasks
     .filter((t) => deriveEffectiveTaskStatus(t, now) !== "completada")
     .sort((a, b) => (a.dueAt ?? "9999").localeCompare(b.dueAt ?? "9999"));
-  const availabilityRules = availabilityRepository.list(user.userId);
-  const studySessions = studySessionsRepository.list(user.userId);
+  const availabilityRules = await availabilityRepository.list(user.userId);
+  const studySessions = await studySessionsRepository.list(user.userId);
 
   const conflicts = detectAllConflicts({
     events: allEvents,

@@ -19,23 +19,22 @@ export default async function AsistentePage({
   const user = await requireSessionUser();
   const { conversationId } = await searchParams;
 
-  const subjects = subjectsRepository.list(user.userId).map((s) => ({ id: s.id, name: s.name }));
-  const files = filesRepository
-    .list(user.userId)
+  const subjects = (await subjectsRepository.list(user.userId)).map((s) => ({ id: s.id, name: s.name }));
+  const files = (await filesRepository.list(user.userId))
     .filter((f) => f.status === "listo")
     .map((f) => ({ id: f.id, name: f.originalName }));
-  const conversations = conversationsRepository.list(user.userId);
+  const conversations = await conversationsRepository.list(user.userId);
 
   let activeConversationId: string | null = null;
   let initialScope: ConversationScope = { type: "general" };
-  let initialMessages = [] as ReturnType<typeof messagesRepository.listByConversation>;
+  let initialMessages = [] as Awaited<ReturnType<typeof messagesRepository.listByConversation>>;
 
   if (conversationId) {
     try {
-      const conversation = conversationsRepository.get(user.userId, conversationId);
+      const conversation = await conversationsRepository.get(user.userId, conversationId);
       activeConversationId = conversation.id;
       initialScope = conversation.scope;
-      initialMessages = messagesRepository.listByConversation(user.userId, conversation.id);
+      initialMessages = await messagesRepository.listByConversation(user.userId, conversation.id);
     } catch {
       activeConversationId = null;
     }

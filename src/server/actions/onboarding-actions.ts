@@ -20,6 +20,6 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
   if (!parsed.success) {
     throw new AppError("VALIDATION", parsed.error.issues[0]?.message ?? "Datos invalidos");
   }
-  profileRepository.completeOnboarding(user.userId, parsed.data.displayName, parsed.data.role);
+  await profileRepository.completeOnboarding(user.userId, parsed.data.displayName, parsed.data.role);
   redirect("/hoy");
 }

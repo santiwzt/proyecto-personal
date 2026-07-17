@@ -25,12 +25,12 @@ export async function uploadFileAction(formData: FormData): Promise<FileAsset> {
   validateUpload({ buffer, declaredMimeType: file.type, maxSizeBytes });
 
   const contentHash = computeContentHash(buffer);
-  const existing = filesRepository.findByHash(user.userId, contentHash);
+  const existing = await filesRepository.findByHash(user.userId, contentHash);
   if (existing) {
     throw new AppError("CONFLICT", `Ya subiste este archivo como "${existing.originalName}".`);
   }
 
-  const record = filesRepository.create(user.userId, {
+  const record = await filesRepository.create(user.userId, {
     originalName: file.name,
     safeName: sanitizeFileName(file.name),
     mimeType: file.type,
@@ -41,34 +41,34 @@ export async function uploadFileAction(formData: FormData): Promise<FileAsset> {
     contentHash,
   });
 
-  filesRepository.markProcessing(user.userId, record.id);
+  await filesRepository.markProcessing(user.userId, record.id);
   try {
     const extraction = await extractText(buffer, file.type);
     if (extraction.partial && extraction.text.length === 0) {
-      filesRepository.markFailed(user.userId, record.id, extraction.warning ?? "No se pudo procesar el archivo.");
+      await filesRepository.markFailed(user.userId, record.id, extraction.warning ?? "No se pudo procesar el archivo.");
     } else {
       const chunks = chunkText(extraction.text);
-      fileChunksRepository.replaceForFile(
+      await fileChunksRepository.replaceForFile(
         user.userId,
         record.id,
         chunks.map((c) => ({ chunkIndex: c.index, content: c.content, charCount: c.charCount, page: null, embedding: null })),
       );
-      filesRepository.markReady(user.userId, record.id, extraction.text);
+      await filesRepository.markReady(user.userId, record.id, extraction.text);
     }
   } catch (error) {
     console.error("File processing failed:", error);
-    filesRepository.markFailed(user.userId, record.id, "Ocurrio un error al procesar el archivo.");
+    await filesRepository.markFailed(user.userId, record.id, "Ocurrio un error al procesar el archivo.");
   }
 
-  activityLogRepository.record(user.userId, "subio", "file", record.id);
+  await activityLogRepository.record(user.userId, "subio", "file", record.id);
   revalidatePath("/archivos");
-  return filesRepository.get(user.userId, record.id);
+  return await filesRepository.get(user.userId, record.id);
 }
 
 export async function deleteFileAction(id: string): Promise<void> {
   const user = await requireSessionUser();
-  filesRepository.softDelete(user.userId, id);
-  fileChunksRepository.removeByFile(user.userId, id);
+  await filesRepository.softDelete(user.userId, id);
+  await fileChunksRepository.removeByFile(user.userId, id);
   revalidatePath("/archivos");
 }
 
@@ -82,7 +82,7 @@ export async function deleteFileAction(id: string): Promise<void> {
  */
 export async function reprocessFileAction(id: string): Promise<FileAsset> {
   const user = await requireSessionUser();
-  const file = filesRepository.get(user.userId, id);
+  const file = await filesRepository.get(user.userId, id);
   if (!file.extractedText) {
     throw new AppError(
       "PROCESSING_FAILED",
@@ -90,12 +90,12 @@ export async function reprocessFileAction(id: string): Promise<FileAsset> {
     );
   }
   const chunks = chunkText(file.extractedText);
-  fileChunksRepository.replaceForFile(
+  await fileChunksRepository.replaceForFile(
     user.userId,
     id,
     chunks.map((c) => ({ chunkIndex: c.index, content: c.content, charCount: c.charCount, page: null, embedding: null })),
   );
-  filesRepository.markReady(user.userId, id, file.extractedText);
+  await filesRepository.markReady(user.userId, id, file.extractedText);
   revalidatePath("/archivos");
-  return filesRepository.get(user.userId, id);
+  return await filesRepository.get(user.userId, id);
 }

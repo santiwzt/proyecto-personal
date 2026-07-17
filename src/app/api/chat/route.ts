@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   }
   const input = parsed.data;
 
-  if (aiUsageRepository.countToday(userId) >= env.AI_DAILY_REQUEST_LIMIT) {
+  if ((await aiUsageRepository.countToday(userId)) >= env.AI_DAILY_REQUEST_LIMIT) {
     return Response.json(
       { code: "LIMIT_EXCEEDED", message: "Alcanzaste el limite diario de solicitudes de IA." },
       { status: 429 },
@@ -51,39 +51,42 @@ export async function POST(request: Request) {
   let fileIds: string[] = [];
   if (input.scope.type === "subject") {
     try {
-      subjectsRepository.get(userId, input.scope.subjectId);
+      await subjectsRepository.get(userId, input.scope.subjectId);
     } catch (error) {
       const { code, message } = toErrorResponse(error);
       return Response.json({ code, message }, { status: isAppError(error) ? error.httpStatus : 500 });
     }
-    fileIds = filesRepository
-      .listBySubject(userId, input.scope.subjectId)
-      .filter((f) => f.status === "listo")
-      .map((f) => f.id);
+    const subjectFiles = await filesRepository.listBySubject(userId, input.scope.subjectId);
+    fileIds = subjectFiles.filter((f) => f.status === "listo").map((f) => f.id);
   } else if (input.scope.type === "files") {
-    fileIds = input.scope.fileIds.filter((id) => {
-      try {
-        return filesRepository.get(userId, id).status === "listo";
-      } catch {
-        return false;
-      }
-    });
+    const checks = await Promise.all(
+      input.scope.fileIds.map(async (id) => {
+        try {
+          const file = await filesRepository.get(userId, id);
+          return file.status === "listo" ? id : null;
+        } catch {
+          return null;
+        }
+      }),
+    );
+    fileIds = checks.filter((id): id is string => id !== null);
   }
 
-  const fileNameById = new Map(
-    fileIds.map((id) => {
-      const file = filesRepository.get(userId, id);
+  const fileNameEntries = await Promise.all(
+    fileIds.map(async (id) => {
+      const file = await filesRepository.get(userId, id);
       return [id, file.originalName] as const;
     }),
   );
-  const chunks = fileIds.length > 0 ? fileChunksRepository.listByFiles(userId, fileIds) : [];
+  const fileNameById = new Map(fileNameEntries);
+  const chunks = fileIds.length > 0 ? await fileChunksRepository.listByFiles(userId, fileIds) : [];
   const context = retrieveChatContext(chunks, fileNameById, input.message);
 
   const conversation = input.conversationId
-    ? conversationsRepository.get(userId, input.conversationId)
-    : conversationsRepository.create(userId, input.message.slice(0, 60), input.scope);
+    ? await conversationsRepository.get(userId, input.conversationId)
+    : await conversationsRepository.create(userId, input.message.slice(0, 60), input.scope);
 
-  messagesRepository.create(userId, conversation.id, "user", input.message, []);
+  await messagesRepository.create(userId, conversation.id, "user", input.message, []);
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -102,7 +105,7 @@ export async function POST(request: Request) {
             controller.enqueue(ndjson({ type: "token", text: token }));
           }
           sources = toMessageSources(context, input.message);
-          aiUsageRepository.record(userId, {
+          await aiUsageRepository.record(userId, {
             feature: "chat",
             provider: "anthropic",
             inputTokens: 0,
@@ -113,7 +116,7 @@ export async function POST(request: Request) {
           fullText = heuristic.content;
           sources = heuristic.sources;
           controller.enqueue(ndjson({ type: "token", text: fullText }));
-          aiUsageRepository.record(userId, {
+          await aiUsageRepository.record(userId, {
             feature: "chat",
             provider: "heuristico",
             inputTokens: 0,
@@ -121,7 +124,7 @@ export async function POST(request: Request) {
           });
         }
 
-        messagesRepository.create(userId, conversation.id, "assistant", fullText, sources);
+        await messagesRepository.create(userId, conversation.id, "assistant", fullText, sources);
         controller.enqueue(ndjson({ type: "done", conversationId: conversation.id, sources }));
       } catch (error) {
         const { message } = toErrorResponse(error);

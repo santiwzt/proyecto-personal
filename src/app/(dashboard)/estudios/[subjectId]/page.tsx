@@ -29,16 +29,23 @@ export default async function SubjectDetailPage({ params }: { params: Promise<{ 
 
   let subject;
   try {
-    subject = subjectsRepository.get(user.userId, subjectId);
+    subject = await subjectsRepository.get(user.userId, subjectId);
   } catch (error) {
     if (isAppError(error)) notFound();
     throw error;
   }
 
-  const topics = topicsRepository.listBySubject(user.userId, subjectId);
-  const exams = examsRepository.listBySubject(user.userId, subjectId);
-  const files = filesRepository.listBySubject(user.userId, subjectId);
+  const topics = await topicsRepository.listBySubject(user.userId, subjectId);
+  const exams = await examsRepository.listBySubject(user.userId, subjectId);
+  const files = await filesRepository.listBySubject(user.userId, subjectId);
   const readyFiles = files.filter((f) => f.status === "listo").map((f) => ({ id: f.id, name: f.originalName }));
+
+  const examsWithReadiness = [];
+  for (const exam of exams) {
+    const examTopics = await topicsRepository.listByIds(user.userId, exam.topicIds);
+    const readiness = computeExamReadiness({ exam, topics: examTopics, attempts: [], relatedTasks: [] });
+    examsWithReadiness.push({ exam, readiness });
+  }
 
   return (
     <div>
@@ -91,9 +98,7 @@ export default async function SubjectDetailPage({ params }: { params: Promise<{ 
             />
           ) : (
             <div className="space-y-4">
-              {exams.map((exam) => {
-                const examTopics = topicsRepository.listByIds(user.userId, exam.topicIds);
-                const readiness = computeExamReadiness({ exam, topics: examTopics, attempts: [], relatedTasks: [] });
+              {examsWithReadiness.map(({ exam, readiness }) => {
                 return (
                   <div key={exam.id} className="rounded-md border border-border p-4">
                     <div className="mb-2 flex flex-wrap items-center justify-between gap-2">

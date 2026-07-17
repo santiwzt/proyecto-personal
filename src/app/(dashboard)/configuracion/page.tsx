@@ -21,8 +21,8 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default async function ConfiguracionPage() {
   const user = await requireSessionUser();
-  const profile = profileRepository.get(user.userId);
-  const preferences = preferencesRepository.get(user.userId);
+  const profile = await profileRepository.get(user.userId);
+  const preferences = await preferencesRepository.get(user.userId);
 
   return (
     <div>

@@ -4,6 +4,7 @@ import { getSessionUser } from "@/lib/auth/session";
 import { isDemoMode } from "@/config/env";
 import { appConfig } from "@/config/app";
 import { startDemoSession } from "@/server/actions/auth-actions";
+import { AuthForm } from "@/features/auth/auth-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,10 +40,7 @@ export default async function LoginPage() {
               </form>
             </>
           ) : (
-            <p className="text-center text-sm text-muted-foreground">
-              Configura las variables de Supabase en <code>.env.local</code> para habilitar el inicio de
-              sesion real. Consulta el README para las instrucciones completas.
-            </p>
+            <AuthForm />
           )}
         </CardContent>
       </Card>

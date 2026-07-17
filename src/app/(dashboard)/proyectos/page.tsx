@@ -15,8 +15,8 @@ import { PROJECT_STATUS_LABELS, TASK_PRIORITY_LABELS } from "@/features/projects
 
 export default async function ProyectosPage() {
   const user = await requireSessionUser();
-  const projects = projectsRepository.list(user.userId);
-  const ideas = ideasRepository.list(user.userId);
+  const projects = await projectsRepository.list(user.userId);
+  const ideas = await ideasRepository.list(user.userId);
 
   const sortedProjects = [...projects].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const sortedIdeas = [...ideas].sort((a, b) => b.createdAt.localeCompare(a.createdAt));

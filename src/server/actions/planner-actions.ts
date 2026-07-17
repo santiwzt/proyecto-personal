@@ -21,23 +21,35 @@ export async function generatePlanAction(input: GeneratePlanInput): Promise<Plan
   const user = await requireSessionUser();
   const parsed = generatePlanSchema.parse(input);
 
-  const subjects = subjectsRepository.list(user.userId);
+  const subjects = await subjectsRepository.list(user.userId);
   const subjectNameById = new Map(subjects.map((s) => [s.id, s.name]));
-  const topics = subjects.flatMap((s) => topicsRepository.listBySubject(user.userId, s.id));
+  const topicsBySubject = await Promise.all(
+    subjects.map((s) => topicsRepository.listBySubject(user.userId, s.id)),
+  );
+  const topics = topicsBySubject.flat();
+
+  const [exams, tasks, events, availabilityRules, studySessions, projects] = await Promise.all([
+    examsRepository.list(user.userId),
+    tasksRepository.list(user.userId),
+    eventsRepository.list(user.userId),
+    availabilityRepository.list(user.userId),
+    studySessionsRepository.list(user.userId),
+    projectsRepository.list(user.userId),
+  ]);
 
   const plan = generatePlan({
     weekStart: parsed.weekStart,
-    exams: examsRepository.list(user.userId),
+    exams,
     topics,
-    tasks: tasksRepository.list(user.userId),
-    events: eventsRepository.list(user.userId),
-    availabilityRules: availabilityRepository.list(user.userId),
-    studySessions: studySessionsRepository.list(user.userId),
-    projects: projectsRepository.list(user.userId),
+    tasks,
+    events,
+    availabilityRules,
+    studySessions,
+    projects,
     subjectNameById,
   });
 
-  const run = plannerRepository.create(user.userId, parsed.weekStart, plan);
+  const run = await plannerRepository.create(user.userId, parsed.weekStart, plan);
   revalidatePath("/agenda");
   return run;
 }
@@ -45,10 +57,10 @@ export async function generatePlanAction(input: GeneratePlanInput): Promise<Plan
 export async function approvePlanAction(input: ApprovePlanInput): Promise<PlannerRun> {
   const user = await requireSessionUser();
   const parsed = approvePlanSchema.parse(input);
-  const run = plannerRepository.get(user.userId, parsed.plannerRunId);
+  const run = await plannerRepository.get(user.userId, parsed.plannerRunId);
 
   if (parsed.mode === "rechazar") {
-    const rejected = plannerRepository.updateStatus(user.userId, run.id, "rechazado", []);
+    const rejected = await plannerRepository.updateStatus(user.userId, run.id, "rechazado", []);
     revalidatePath("/agenda");
     return rejected;
   }
@@ -61,7 +73,7 @@ export async function approvePlanAction(input: ApprovePlanInput): Promise<Planne
   }
 
   for (const block of blocksToApprove) {
-    eventsRepository.create(user.userId, {
+    await eventsRepository.create(user.userId, {
       title: block.activityTitle,
       category: block.activityKind === "proyecto" ? "proyecto" : "estudio",
       startsAt: `${block.date}T${block.startTime}:00-03:00`,
@@ -75,7 +87,7 @@ export async function approvePlanAction(input: ApprovePlanInput): Promise<Planne
     });
 
     if (block.sourceRefType === "exam" && block.sourceRefId) {
-      studySessionsRepository.create(user.userId, {
+      await studySessionsRepository.create(user.userId, {
         subjectId: null,
         topicId: null,
         examId: block.sourceRefId,
@@ -87,7 +99,7 @@ export async function approvePlanAction(input: ApprovePlanInput): Promise<Planne
   }
 
   const status = parsed.mode === "todo" ? "aprobado_total" : "aprobado_parcial";
-  const updated = plannerRepository.updateStatus(
+  const updated = await plannerRepository.updateStatus(
     user.userId,
     run.id,
     status,
