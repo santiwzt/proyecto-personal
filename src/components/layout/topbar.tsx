@@ -19,8 +19,6 @@ import {
 
 export interface TopbarProps {
   user: SessionUser;
-  /** Called with the current search query as the user types. No-op until search is wired up. */
-  onSearch?: (query: string) => void;
   /** Opens the quick-capture flow. No-op until that feature is wired up. */
   onQuickCapture?: () => void;
   /** Signs the user out. No-op until the sign-out server action is wired up. */
@@ -34,10 +32,10 @@ function initials(name: string): string {
   return (first + last).toUpperCase() || "?";
 }
 
-export function Topbar({ user, onSearch, onQuickCapture, onSignOut }: TopbarProps) {
+export function Topbar({ user, onQuickCapture, onSignOut }: TopbarProps) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background px-4 md:px-6">
-      <div className="flex flex-1 items-center gap-2">
+      <form action="/buscar" className="flex flex-1 items-center gap-2">
         <Label htmlFor="topbar-search" className="sr-only">
           Buscar
         </Label>
@@ -46,15 +44,9 @@ export function Topbar({ user, onSearch, onQuickCapture, onSignOut }: TopbarProp
             className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
           />
-          <Input
-            id="topbar-search"
-            type="search"
-            placeholder="Buscar..."
-            className="pl-9"
-            onChange={(event) => onSearch?.(event.target.value)}
-          />
+          <Input id="topbar-search" name="q" type="search" placeholder="Buscar..." className="pl-9" />
         </div>
-      </div>
+      </form>
 
       <Button type="button" size="sm" onClick={() => onQuickCapture?.()}>
         <Sparkles aria-hidden="true" />
