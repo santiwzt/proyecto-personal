@@ -1,0 +1,8 @@
+El tiro oblicuo es un movimiento en dos dimensiones que combina un
+movimiento horizontal a velocidad constante con un movimiento vertical
+uniformemente acelerado por la gravedad. La velocidad inicial tiene una
+componente horizontal y una componente vertical, calculadas a partir del
+angulo de lanzamiento. El alcance maximo se logra con un angulo de
+lanzamiento de 45 grados, cuando no hay rozamiento del aire. La altura
+maxima se alcanza cuando la componente vertical de la velocidad se hace
+cero, exactamente a la mitad del tiempo total de vuelo.

@@ -253,7 +253,12 @@ export function ChatPanel({ subjects, files, initialConversationId, initialScope
           rows={2}
           className="flex-1"
         />
-        <Button type="button" onClick={handleSend} disabled={isStreaming || !input.trim()}>
+        <Button
+          type="button"
+          onClick={handleSend}
+          disabled={isStreaming || !input.trim()}
+          aria-label="Enviar mensaje"
+        >
           {isStreaming ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Send aria-hidden="true" />}
         </Button>
       </div>
