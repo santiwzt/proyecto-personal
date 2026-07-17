@@ -26,7 +26,12 @@ export async function startDemoSession(): Promise<void> {
   redirect(profile?.onboardingCompletedAt ? "/hoy" : "/onboarding");
 }
 
-/** Translates common Supabase Auth error messages to plain Spanish. Never leaks raw provider detail. */
+/**
+ * Translates common Supabase Auth error messages to plain Spanish. Never
+ * leaks raw provider detail to the client -- but DOES log the raw message
+ * server-side (console.error at the call site) so it's visible in Vercel's
+ * runtime logs when something doesn't match a known pattern below.
+ */
 function translateAuthError(message: string): string {
   const normalized = message.toLowerCase();
   if (normalized.includes("already registered") || normalized.includes("already exists")) {
@@ -37,6 +42,12 @@ function translateAuthError(message: string): string {
   }
   if (normalized.includes("email not confirmed")) {
     return "Todavia no confirmaste tu email. Revisa tu casilla de correo.";
+  }
+  if (normalized.includes("rate limit") || normalized.includes("security purposes")) {
+    return "Hiciste muchos intentos seguidos. Esperá un minuto y volvé a intentar.";
+  }
+  if (normalized.includes("database error")) {
+    return "Ocurrio un error creando tu cuenta en el servidor. Ya lo estamos revisando.";
   }
   if (normalized.includes("password")) {
     return "La contraseña no cumple los requisitos minimos (al menos 8 caracteres).";
@@ -66,6 +77,7 @@ export async function signUpAction(input: SignUpInput): Promise<SignUpResult> {
   });
 
   if (error) {
+    console.error("Supabase signUp error:", error.status, error.message);
     throw new AppError("VALIDATION", translateAuthError(error.message));
   }
 
@@ -92,6 +104,7 @@ export async function signInAction(input: SignInInput): Promise<void> {
   });
 
   if (error) {
+    console.error("Supabase signIn error:", error.status, error.message);
     throw new AppError("AUTHENTICATION", translateAuthError(error.message));
   }
   redirect("/hoy");
