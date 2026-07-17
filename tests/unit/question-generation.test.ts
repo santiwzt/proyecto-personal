@@ -57,5 +57,82 @@ describe("generateQuestionsHeuristic", () => {
     const falseOnes = questions.filter((q) => q.expectedAnswer === "Falso");
     expect(questions.every((q) => q.kind === "verdadero_falso")).toBe(true);
     expect(falseOnes.length).toBeGreaterThanOrEqual(0);
+    // The old heuristic used to literally append a meta-comment revealing
+    // the statement was inverted — that defeats the point of the quiz.
+    for (const q of questions) {
+      expect(q.prompt.toLowerCase()).not.toContain("invertida");
+    }
+  });
+
+  it("produces a mix of question kinds instead of only fill-in-the-blank in mixto mode", () => {
+    const questions = generateQuestionsHeuristic({
+      chunks: [chunk],
+      topicName: null,
+      difficulty: "media",
+      count: 6,
+      kind: "mixto",
+    });
+    const kinds = new Set(questions.map((q) => q.kind));
+    expect(kinds.size).toBeGreaterThan(1);
+  });
+
+  it("generates a definition-style short-answer question with the real definition as the expected answer", () => {
+    const questions = generateQuestionsHeuristic({
+      chunks: [chunk],
+      topicName: null,
+      difficulty: "media",
+      count: 2,
+      kind: "respuesta_breve",
+    });
+    const definitionQuestion = questions.find((q) => q.prompt.startsWith('¿Qué es "El tiro vertical"'));
+    expect(definitionQuestion).toBeDefined();
+    expect(chunk.content).toContain(definitionQuestion!.expectedAnswer);
+  });
+
+  it("builds multiple-choice questions whose distractors are real definitions from the same material, never fabricated", () => {
+    const richChunk: FileChunk = {
+      ...chunk,
+      content:
+        "El tiro vertical es un movimiento donde un objeto se lanza hacia arriba con velocidad inicial. " +
+        "La caida libre es un movimiento donde un objeto cae solo bajo la accion de la gravedad. " +
+        "El MRU es un movimiento donde la velocidad permanece constante en el tiempo.",
+    };
+    const questions = generateQuestionsHeuristic({
+      chunks: [richChunk],
+      topicName: null,
+      difficulty: "media",
+      count: 3,
+      kind: "opcion_multiple",
+    });
+    const mcQuestions = questions.filter((q) => q.kind === "opcion_multiple");
+    expect(mcQuestions.length).toBeGreaterThan(0);
+    for (const q of mcQuestions) {
+      expect(q.options).not.toBeNull();
+      expect(q.options!.length).toBeGreaterThanOrEqual(3);
+      expect(q.options).toContain(q.expectedAnswer);
+      // Every option must be a real sentence fragment lifted from the
+      // material — never invented text.
+      for (const option of q.options!) {
+        expect(richChunk.content).toContain(option);
+      }
+    }
+  });
+
+  it("declines to build a fill-in-blank question when the key term is ambiguous (appears more than once)", () => {
+    const ambiguousChunk: FileChunk = {
+      ...chunk,
+      content: "El objeto tarda 5 segundos en subir y 5 segundos en bajar en total, segun el material de catedra.",
+    };
+    const questions = generateQuestionsHeuristic({
+      chunks: [ambiguousChunk],
+      topicName: null,
+      difficulty: "media",
+      count: 3,
+      kind: "respuesta_breve",
+    });
+    // The only candidate sentence has an ambiguous numeric anchor ("5"
+    // appears twice) and no definition pattern, so nothing gradeable can be
+    // built from it — better to return nothing than a low-quality blank.
+    expect(questions).toEqual([]);
   });
 });

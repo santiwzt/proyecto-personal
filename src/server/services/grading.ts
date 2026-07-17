@@ -19,6 +19,49 @@ const SPANISH_STOPWORDS = new Set([
   "debe", "deben", "mencionar", "decir", "debes", "indicar",
 ]);
 
+/**
+ * A small, deliberately conservative synonym table for common Spanish
+ * academic phrasing. This does NOT try to be a general thesaurus — it only
+ * collapses a handful of everyday synonym pairs to their canonical form
+ * ("incrementa"/"sube"/"aumenta" all become "aumenta") so the concept-overlap
+ * check keeps scoring concepts, not exact word choice, per
+ * docs/decisions/0005-heuristic-grading-limitations.md.
+ */
+const SYNONYM_CANONICAL: Record<string, string> = {
+  incrementa: "aumenta",
+  incrementar: "aumenta",
+  incremento: "aumenta",
+  sube: "aumenta",
+  subir: "aumenta",
+  crece: "aumenta",
+  crecer: "aumenta",
+  decrece: "disminuye",
+  decrecer: "disminuye",
+  reduce: "disminuye",
+  reducir: "disminuye",
+  baja: "disminuye",
+  bajar: "disminuye",
+  cae: "disminuye",
+  explica: "describe",
+  explicar: "describe",
+  origina: "causa",
+  originar: "causa",
+  provoca: "causa",
+  provocar: "causa",
+  genera: "causa",
+  generar: "causa",
+  produce: "causa",
+  producir: "causa",
+  comienza: "inicia",
+  empieza: "inicia",
+  finaliza: "termina",
+  concluye: "termina",
+};
+
+function canonicalTerm(term: string): string {
+  return SYNONYM_CANONICAL[term] ?? term;
+}
+
 function significantTerms(text: string): Set<string> {
   return new Set(
     text
@@ -27,7 +70,8 @@ function significantTerms(text: string): Set<string> {
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, " ")
       .split(/\s+/)
-      .filter((t) => t.length >= 3 && !SPANISH_STOPWORDS.has(t)),
+      .filter((t) => t.length >= 3 && !SPANISH_STOPWORDS.has(t))
+      .map(canonicalTerm),
   );
 }
 
@@ -36,6 +80,19 @@ function overlapRatio(answer: Set<string>, expected: Set<string>): number {
   let matches = 0;
   for (const term of expected) if (answer.has(term)) matches += 1;
   return matches / expected.size;
+}
+
+/** Picks the gradingCriteria entry the answer covers worst, rather than the
+ * first one under a fixed threshold — a more precise "here's the gap"
+ * signal when several criteria are only partially covered. */
+function weakestCriterion(answerTerms: Set<string>, criteria: string[]): { criterion: string; ratio: number } | null {
+  if (criteria.length === 0) return null;
+  let weakest: { criterion: string; ratio: number } | null = null;
+  for (const criterion of criteria) {
+    const ratio = overlapRatio(answerTerms, significantTerms(criterion));
+    if (!weakest || ratio < weakest.ratio) weakest = { criterion, ratio };
+  }
+  return weakest;
 }
 
 /**
@@ -69,23 +126,45 @@ export function gradeAnswerHeuristic(question: PracticeQuestion, answerText: str
     };
   }
 
+  const trimmedAnswer = answerText.trim();
+  if (trimmedAnswer.length === 0) {
+    return {
+      isCorrect: false,
+      feedback: "No escribiste una respuesta todavia.",
+      firstErrorHint: question.gradingCriteria[0] ?? null,
+      gradedBy: "heuristico",
+    };
+  }
+
   const answerTerms = significantTerms(answerText);
   const criteriaTerms = significantTerms(
     [question.expectedAnswer, ...question.gradingCriteria].join(" "),
   );
   const ratio = overlapRatio(answerTerms, criteriaTerms);
   const isCorrect = ratio >= 0.4;
+  const gap = weakestCriterion(answerTerms, question.gradingCriteria);
+  const missingCriterion = gap?.criterion ?? question.gradingCriteria[0] ?? null;
 
-  const missingCriterion = question.gradingCriteria.find(
-    (criterion) => overlapRatio(answerTerms, significantTerms(criterion)) < 0.3,
-  );
+  let feedback: string;
+  if (isCorrect && ratio >= 0.8) {
+    feedback = "Tu respuesta cubre los puntos clave esperados.";
+  } else if (isCorrect) {
+    // Passed the threshold but there's still a partially-covered criterion
+    // worth calling out — partial credit in tone, not just pass/fail.
+    feedback =
+      gap && gap.ratio < 0.6
+        ? `Tu respuesta esta encaminada y cubre lo principal, pero podrias profundizar: ${gap.criterion}.`
+        : "Tu respuesta cubre los puntos clave esperados.";
+  } else if (ratio > 0) {
+    feedback = `Vas por buen camino, pero te falta cubrir: ${missingCriterion ?? "un aspecto importante"}.`;
+  } else {
+    feedback = `No encuentro relacion con los puntos clave esperados. Repasa: ${missingCriterion ?? "el material de la pregunta"}.`;
+  }
 
   return {
     isCorrect,
-    feedback: isCorrect
-      ? "Tu respuesta cubre los puntos clave esperados."
-      : `Te falta cubrir: ${missingCriterion ?? question.gradingCriteria[0] ?? "un aspecto importante"}.`,
-    firstErrorHint: isCorrect ? null : (missingCriterion ?? null),
+    feedback,
+    firstErrorHint: isCorrect ? null : missingCriterion,
     gradedBy: "heuristico",
   };
 }

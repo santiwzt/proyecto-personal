@@ -76,4 +76,45 @@ describe("parseQuickCapture", () => {
     const result = parseQuickCapture("Rindo Quimica el lunes", context);
     expect(result.type).toBe("unknown");
   });
+
+  it("interprets a parcial/final/coloquio exam mention, not just 'rindo' or 'examen de'", () => {
+    const result = parseQuickCapture("Tengo el parcial de Matematica el viernes a las 14", context);
+    expect(result.type).toBe("exam");
+    if (result.type === "exam") {
+      expect(result.data.subjectId).toBe("sub-matematica");
+    }
+  });
+
+  it("resolves a relative 'en N dias' date expression", () => {
+    const result = parseQuickCapture("Recordame entregar el trabajo en 3 dias", context);
+    expect(result.type).toBe("task");
+    if (result.type === "task") {
+      expect(result.data.dueAt).not.toBeNull();
+      expect(result.data.dueAt).toContain("2026-07-19"); // now + 3 days
+    }
+  });
+
+  it("resolves 'dentro de una semana' as a week out", () => {
+    const result = parseQuickCapture("Rindo Fisica dentro de una semana a las 10", context);
+    expect(result.type).toBe("exam");
+    if (result.type === "exam") {
+      expect(result.data.scheduledAt).toContain("2026-07-23");
+    }
+  });
+
+  it("recognizes 'leer' and 'practicar' as task verbs", () => {
+    const result = parseQuickCapture("Practicar ejercicios de tiro vertical durante 45 minutos", context);
+    expect(result.type).toBe("task");
+    if (result.type === "task") {
+      expect(result.data.estimatedMinutes).toBe(45);
+    }
+  });
+
+  it("classifies a cumpleanos mention as a personal event", () => {
+    const result = parseQuickCapture("Cumpleanos de Juli el sabado a las 20", context);
+    expect(result.type).toBe("event");
+    if (result.type === "event") {
+      expect(result.data.category).toBe("personal");
+    }
+  });
 });

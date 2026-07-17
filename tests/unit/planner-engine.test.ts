@@ -186,6 +186,10 @@ describe("generatePlan", () => {
     expect(plan.assumptions.length).toBeGreaterThan(0);
     expect(typeof plan.summary).toBe("string");
     expect(plan.summary.length).toBeGreaterThan(0);
+    // The summary should reference concrete numbers/names, not just a
+    // generic block count.
+    expect(plan.summary).toContain("Examen de Fisica");
+    expect(plan.summary).toMatch(/\d+(\.\d+)? h en total/);
   });
 
   it("reports unscheduled items instead of silently dropping work when there is no capacity", () => {
@@ -212,5 +216,14 @@ describe("generatePlan", () => {
     });
 
     expect(plan.unscheduledItems.length).toBeGreaterThan(0);
+
+    // The recommendations should call out the specific unscheduled items
+    // and suggest a concrete lever (raising the daily max / availability),
+    // not just report the schedule silently.
+    const unscheduledRecommendation = plan.recommendations.find((r) =>
+      r.message.includes("No quedo lugar esta semana"),
+    );
+    expect(unscheduledRecommendation).toBeDefined();
+    expect(unscheduledRecommendation!.relatedIds.length).toBe(plan.unscheduledItems.length);
   });
 });

@@ -63,5 +63,34 @@ describe("gradeAnswerHeuristic — respuesta breve", () => {
     const result = gradeAnswerHeuristic(shortAnswerQuestion, "No tengo idea");
     expect(result.isCorrect).toBe(false);
     expect(result.firstErrorHint).toBeTruthy();
+    expect(result.feedback.toLowerCase()).toContain("no encuentro relacion");
+  });
+
+  it("treats an empty answer as incorrect with a distinct message instead of scoring it", () => {
+    const result = gradeAnswerHeuristic(shortAnswerQuestion, "   ");
+    expect(result.isCorrect).toBe(false);
+    expect(result.feedback.toLowerCase()).toContain("no escribiste");
+  });
+
+  it("gives partial-credit-flavored feedback for a partially off-topic answer instead of a flat rejection", () => {
+    const result = gradeAnswerHeuristic(shortAnswerQuestion, "Porque el objeto se cansa de subir");
+    // "objeto" and "subir" overlap with the criteria but the core concept
+    // (cambio de sentido) is missing — should read as encouragement + gap,
+    // not the harsher "no encuentro relacion" used for zero overlap.
+    if (!result.isCorrect) {
+      expect(result.feedback.toLowerCase()).toContain("vas por buen camino");
+    }
+  });
+
+  it("recognizes a common synonym (sube/aumenta) as covering the same concept", () => {
+    const question: PracticeQuestion = {
+      ...shortAnswerQuestion,
+      id: "q3",
+      prompt: "¿Qué le pasa a la velocidad durante la subida?",
+      expectedAnswer: "La velocidad disminuye durante la subida",
+      gradingCriteria: ["Debe mencionar que la velocidad disminuye"],
+    };
+    const withSynonym = gradeAnswerHeuristic(question, "La velocidad baja durante la subida");
+    expect(withSynonym.isCorrect).toBe(true);
   });
 });

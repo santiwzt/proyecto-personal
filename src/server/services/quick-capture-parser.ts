@@ -54,6 +54,17 @@ function resolveDate(text: string, now: Date): Date | null {
   }
   if (/\bhoy\b/.test(normalized)) return now;
 
+  if (/\ben\s+una\s+semana\b|\bdentro\s+de\s+una\s+semana\b|\bla\s+semana\s+que\s+viene\b/.test(normalized)) {
+    return addDays(now, 7);
+  }
+
+  const inDaysMatch = normalized.match(/\b(?:en|dentro\s+de)\s+(\d+|un|una|dos|tres|cuatro|cinco)\s+dias?\b/);
+  if (inDaysMatch) {
+    const raw = inDaysMatch[1]!;
+    const quantity = Number.isNaN(Number(raw)) ? NUMBER_WORDS[raw] : Number(raw);
+    if (quantity !== undefined && quantity > 0) return addDays(now, quantity);
+  }
+
   const weekdayMatch = findWeekdayMatch(text);
   if (weekdayMatch) {
     const currentDow = now.getDay();
@@ -181,7 +192,11 @@ export function parseQuickCapture(rawText: string, context: QuickCaptureContext)
   }
 
   // 3. Exams.
-  if (/\b(rindo|tengo\s+examen|examen\s+de|evaluacion\s+de|prueba\s+de)\b/.test(normalized)) {
+  if (
+    /\b(rindo|tengo\s+examen|examen\s+de|evaluacion\s+de|prueba\s+de|parcial\s+de|final\s+de|coloquio\s+de|recuperatorio\s+de)\b/.test(
+      normalized,
+    )
+  ) {
     const subject = findSubjectMention(text, context.subjects);
     const date = resolveDate(text, now);
     const time = parseTimeOfDay(text) ?? { hour: 9, minute: 0 };
@@ -212,7 +227,7 @@ export function parseQuickCapture(rawText: string, context: QuickCaptureContext)
   }
 
   // 4. Events (training, matches, generic scheduled activities).
-  if (/\b(entrenamiento|partido|reunion|turno|clase)\b/.test(normalized)) {
+  if (/\b(entrenamiento|partido|reunion|turno|clase|cumpleanos|cita)\b/.test(normalized)) {
     const date = resolveDate(text, now);
     const range = parseTimeRange(text);
     const single = parseTimeOfDay(text);
@@ -228,7 +243,9 @@ export function parseQuickCapture(rawText: string, context: QuickCaptureContext)
         ? "partido"
         : normalized.includes("clase")
           ? "clase"
-          : "otro";
+          : normalized.includes("cumpleanos") || normalized.includes("cita")
+            ? "personal"
+            : "otro";
     const start = range ? range.start : (single ?? { hour: 18, minute: 0 });
     const end = range ? range.end : { hour: start.hour + 1, minute: start.minute };
     return {
@@ -257,8 +274,9 @@ export function parseQuickCapture(rawText: string, context: QuickCaptureContext)
   const explicitTime = parseTimeOfDay(text);
 
   const isTaskLike =
-    /\b(recordame|tengo que|hacer|estudiar|llevar|entregar|terminar|preparar|repasar)\b/.test(normalized) ||
-    duration !== null;
+    /\b(recordame|tengo que|hacer|estudiar|llevar|entregar|terminar|preparar|repasar|leer|practicar|resolver|revisar|completar|corregir)\b/.test(
+      normalized,
+    ) || duration !== null;
 
   if (isTaskLike || context.subjects.length === 0) {
     const title = text

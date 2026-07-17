@@ -65,7 +65,7 @@ test.describe("golden path", () => {
     const approveAllButton = page.getByRole("button", { name: /aprobar todo/i });
     if (await approveAllButton.isVisible().catch(() => false)) {
       await approveAllButton.click();
-      await expect(page.getByText(/ya estan en tu agenda/i)).toBeVisible();
+      await expect(page.getByText(/ya estan en tu agenda/i).first()).toBeVisible();
     }
   });
 });

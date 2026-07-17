@@ -34,3 +34,10 @@ not a stub.
 - Every graded attempt records which path graded it
   (`PracticeAttempt`/`AiUsageRecord`), so the UI can be transparent about it
   if needed.
+- A small, hand-picked synonym table (`SYNONYM_CANONICAL` in
+  `grading.ts`) collapses a handful of everyday Spanish synonym pairs
+  ("sube"/"incrementa"/"aumenta") to one canonical term before the overlap
+  check, and feedback wording now varies with how far above/below the 40%
+  threshold the answer lands (e.g. "vas por buen camino" vs "no encuentro
+  relacion"). This is still concept-overlap, not a real thesaurus or NLP —
+  it only reduces false negatives from a few very common phrasing choices.

@@ -328,14 +328,33 @@ export function generatePlan(input: PlannerEngineInput): GeneratedPlan {
   const conflicts = [...existingConflicts, ...proposalConflicts];
 
   const examCount = input.exams.filter((e) => e.status === "programado").length;
+  const totalPlannedMinutes = blocks.reduce((sum, b) => {
+    const [sh, sm] = b.startTime.split(":").map(Number);
+    const [eh, em] = b.endTime.split(":").map(Number);
+    return sum + ((eh! * 60 + em!) - (sh! * 60 + sm!));
+  }, 0);
+  const totalPlannedHours = Math.round((totalPlannedMinutes / 60) * 10) / 10;
+
+  const upcomingExam = [...input.exams]
+    .filter((e) => e.status === "programado")
+    .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt))[0];
+
+  const unscheduledPreview = unscheduledItems
+    .slice(0, 3)
+    .map((u) => `"${u.title}"`)
+    .join(", ");
+
   const summary =
     blocks.length > 0
-      ? `Propuse ${blocks.length} bloques de estudio para esta semana, priorizando los temas con menor confianza declarada y las tareas con fecha mas cercana.` +
+      ? `Propuse ${blocks.length} bloques de estudio (${totalPlannedHours} h en total) para esta semana, priorizando los temas con menor confianza declarada y las tareas con fecha mas cercana.` +
+        (upcomingExam ? ` Tu proximo examen programado es "${upcomingExam.title}" el ${dateKey(upcomingExam.scheduledAt)}.` : "") +
         (unscheduledItems.length > 0
-          ? ` No pude ubicar ${unscheduledItems.length} actividad(es) por falta de tiempo disponible.`
+          ? ` No pude ubicar ${unscheduledItems.length} actividad(es) (${unscheduledPreview}${
+              unscheduledItems.length > 3 ? ", entre otras" : ""
+            }) por falta de tiempo disponible.`
           : "")
       : examCount > 0
-        ? "No hay suficiente disponibilidad libre esta semana para proponer bloques de estudio."
+        ? `No hay suficiente disponibilidad libre esta semana para proponer bloques de estudio, aunque tenes ${examCount} examen(es) programado(s). Revisa tu disponibilidad configurada o el maximo diario de estudio (actualmente ${maxDaily} min).`
         : "No encontre examenes ni tareas pendientes que necesiten bloques de estudio esta semana.";
 
   const assumptions = [
@@ -343,12 +362,32 @@ export function generatePlan(input: PlannerEngineInput): GeneratedPlan {
     `Cada bloque de estudio dura ${BLOCK_MINUTES} minutos con un descanso minimo de ${BREAK_MINUTES} minutos entre bloques.`,
     `El maximo de estudio por dia esta configurado en ${maxDaily} minutos.`,
     "Los temas con confianza declarada menor a 40/100 reciben el doble de bloques de repaso.",
+    `Solo se consideran examenes programados dentro de los proximos ${EXAM_HORIZON_DAYS} dias desde el inicio de la semana.`,
   ];
 
   const recommendations = needs
     .filter((n) => n.refType === "exam" && (n.priorityScore ?? 0) >= 4)
     .slice(0, 3)
     .map((n) => ({ message: n.reason, relatedIds: [n.refId] }));
+
+  if (unscheduledItems.length > 0) {
+    recommendations.push({
+      message:
+        `No quedo lugar esta semana para: ${unscheduledPreview}${
+          unscheduledItems.length > 3 ? " y otras actividades" : ""
+        }. Si liberas mas tiempo (subiendo el maximo diario de ${maxDaily} min o agregando disponibilidad), puedo volver a proponer el plan con eso incluido.`,
+      relatedIds: unscheduledItems.map((u) => u.refId),
+    });
+  }
+
+  const overloadedDays = proposalConflicts.filter((c) => c.kind === "sobrecarga_diaria");
+  if (overloadedDays.length > 0) {
+    const overloadedDates = overloadedDays.map((c) => c.date).filter((d): d is string => d !== null);
+    recommendations.push({
+      message: `Los dias ${overloadedDates.join(", ")} superan el maximo diario de estudio configurado (${maxDaily} min). Considera mover alguna sesion a un dia con menos carga o subir ese maximo si te queda comodo.`,
+      relatedIds: overloadedDays.flatMap((c) => c.relatedIds),
+    });
+  }
 
   return { summary, conflicts, recommendations, blocks, unscheduledItems, assumptions };
 }
