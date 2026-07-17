@@ -55,13 +55,17 @@ function translateAuthError(message: string): string {
   return "No pudimos completar la operacion. Intenta nuevamente.";
 }
 
-export interface SignUpResult {
-  requiresEmailConfirmation: boolean;
-}
+// Next.js strips the `message` off any *thrown* Server Action error before
+// it reaches the client in production (by design, to avoid leaking server
+// detail) -- so expected, user-facing outcomes here are returned as plain
+// data instead of thrown, and only truly unexpected failures throw.
+export type SignUpResult =
+  | { ok: true; requiresEmailConfirmation: boolean }
+  | { ok: false; message: string };
 
 export async function signUpAction(input: SignUpInput): Promise<SignUpResult> {
   if (!isSupabaseConfigured) {
-    throw new AppError("VALIDATION", "El registro con email no esta disponible en modo demo.");
+    return { ok: false, message: "El registro con email no esta disponible en modo demo." };
   }
   const parsed = signUpSchema.parse(input);
 
@@ -78,7 +82,7 @@ export async function signUpAction(input: SignUpInput): Promise<SignUpResult> {
 
   if (error) {
     console.error("Supabase signUp error:", error.status, error.message);
-    throw new AppError("VALIDATION", translateAuthError(error.message));
+    return { ok: false, message: translateAuthError(error.message) };
   }
 
   // If email confirmation is required, Supabase returns a user but no
@@ -87,12 +91,14 @@ export async function signUpAction(input: SignUpInput): Promise<SignUpResult> {
   if (!requiresEmailConfirmation) {
     redirect("/onboarding");
   }
-  return { requiresEmailConfirmation };
+  return { ok: true, requiresEmailConfirmation };
 }
 
-export async function signInAction(input: SignInInput): Promise<void> {
+export type SignInResult = { ok: true } | { ok: false; message: string };
+
+export async function signInAction(input: SignInInput): Promise<SignInResult> {
   if (!isSupabaseConfigured) {
-    throw new AppError("VALIDATION", "El inicio de sesion con email no esta disponible en modo demo.");
+    return { ok: false, message: "El inicio de sesion con email no esta disponible en modo demo." };
   }
   const parsed = signInSchema.parse(input);
 
@@ -105,7 +111,7 @@ export async function signInAction(input: SignInInput): Promise<void> {
 
   if (error) {
     console.error("Supabase signIn error:", error.status, error.message);
-    throw new AppError("AUTHENTICATION", translateAuthError(error.message));
+    return { ok: false, message: translateAuthError(error.message) };
   }
   redirect("/hoy");
 }

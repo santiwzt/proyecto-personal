@@ -23,14 +23,13 @@ export function AuthForm() {
     const password = String(form.get("password") ?? "");
     startTransition(async () => {
       try {
-        await signInAction({ email, password });
+        const result = await signInAction({ email, password });
+        if (!result.ok) {
+          toast({ variant: "destructive", title: "No pudimos iniciar sesion", description: result.message });
+        }
       } catch (error) {
         unstable_rethrow(error);
-        toast({
-          variant: "destructive",
-          title: "No pudimos iniciar sesion",
-          description: error instanceof Error ? error.message : undefined,
-        });
+        toast({ variant: "destructive", title: "No pudimos iniciar sesion" });
       }
     });
   }
@@ -44,16 +43,16 @@ export function AuthForm() {
     startTransition(async () => {
       try {
         const result = await signUpAction({ displayName, email, password });
+        if (!result.ok) {
+          toast({ variant: "destructive", title: "No pudimos crear la cuenta", description: result.message });
+          return;
+        }
         if (result.requiresEmailConfirmation) {
           setConfirmationEmail(email);
         }
       } catch (error) {
         unstable_rethrow(error);
-        toast({
-          variant: "destructive",
-          title: "No pudimos crear la cuenta",
-          description: error instanceof Error ? error.message : undefined,
-        });
+        toast({ variant: "destructive", title: "No pudimos crear la cuenta" });
       }
     });
   }
