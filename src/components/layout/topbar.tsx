@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { LogOut, Search, Settings, Sparkles } from "lucide-react";
+import { HelpCircle, LogOut, Search, Settings, Sparkles } from "lucide-react";
 
 import type { SessionUser } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,8 @@ export interface TopbarProps {
   user: SessionUser;
   /** Opens the quick-capture flow. No-op until that feature is wired up. */
   onQuickCapture?: () => void;
+  /** Opens the "how it works" help guide. No-op until that feature is wired up. */
+  onOpenHelp?: () => void;
   /** Signs the user out. No-op until the sign-out server action is wired up. */
   onSignOut?: () => void;
 }
@@ -34,7 +36,7 @@ function initials(name: string): string {
   return (first + last).toUpperCase() || "?";
 }
 
-export function Topbar({ user, onQuickCapture, onSignOut }: TopbarProps) {
+export function Topbar({ user, onQuickCapture, onOpenHelp, onSignOut }: TopbarProps) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background px-4 md:px-6">
       <form action="/buscar" className="flex flex-1 items-center gap-2">
@@ -53,6 +55,16 @@ export function Topbar({ user, onQuickCapture, onSignOut }: TopbarProps) {
       <Button type="button" size="sm" aria-label="Captura rapida" onClick={() => onQuickCapture?.()}>
         <Sparkles aria-hidden="true" />
         <span className="hidden sm:inline">Captura rapida</span>
+      </Button>
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label="Como funciona la app"
+        onClick={() => onOpenHelp?.()}
+      >
+        <HelpCircle aria-hidden="true" />
       </Button>
 
       <ThemeToggle />
