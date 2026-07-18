@@ -41,141 +41,130 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/*
- * Brand palette, matching the Nexo logomark and marketing pieces: a warm
- * cream ground with deep navy ink and an amber "spark" accent (the
- * logomark's four-pointed motif). Dark mode swaps in the same navy as the
- * *background* and shifts the accent to the lighter amber so it still pops
- * against it -- see docs/decisions for the reasoning (a dark navy button on
- * a dark navy page has no contrast, so the accent role has to shift, while
- * light mode keeps navy as the strong, grounded primary).
- */
 :root {
   --radius: 0.625rem;
 
-  --background: oklch(0.944 0.028 88.8);
-  --foreground: oklch(0.297 0.082 285.1);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.18 0.01 260);
 
-  --card: oklch(0.99 0.006 89);
-  --card-foreground: oklch(0.297 0.082 285.1);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.01 260);
 
-  --popover: oklch(0.99 0.006 89);
-  --popover-foreground: oklch(0.297 0.082 285.1);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.01 260);
 
-  /* Primary: the logomark's navy ink. */
-  --primary: oklch(0.297 0.082 285.1);
-  --primary-foreground: oklch(0.98 0.01 89);
+  /* Single accent: a restrained indigo/blue. */
+  --primary: oklch(0.5 0.16 260);
+  --primary-foreground: oklch(0.98 0.005 260);
 
-  --secondary: oklch(0.909 0.049 88.8);
-  --secondary-foreground: oklch(0.297 0.082 285.1);
+  --secondary: oklch(0.96 0.005 260);
+  --secondary-foreground: oklch(0.24 0.01 260);
 
-  --muted: oklch(0.92 0.03 88);
-  --muted-foreground: oklch(0.456 0.071 289.5);
+  --muted: oklch(0.96 0.005 260);
+  --muted-foreground: oklch(0.5 0.015 260);
 
-  --accent: oklch(0.9 0.05 70);
-  --accent-foreground: oklch(0.297 0.082 285.1);
+  --accent: oklch(0.94 0.02 260);
+  --accent-foreground: oklch(0.24 0.01 260);
 
   --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.98 0.01 89);
+  --destructive-foreground: oklch(0.98 0.005 260);
 
-  --border: oklch(0.851 0.058 89.7);
-  --input: oklch(0.851 0.058 89.7);
-  /* Ring: the logomark's amber spark. */
-  --ring: oklch(0.702 0.132 61.7);
+  --border: oklch(0.9 0.005 260);
+  --input: oklch(0.9 0.005 260);
+  --ring: oklch(0.5 0.16 260);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: oklch(0.235 0.058 285.4);
-    --foreground: oklch(0.926 0.041 90.3);
+    --background: oklch(0.16 0.01 260);
+    --foreground: oklch(0.95 0.005 260);
 
-    --card: oklch(0.268 0.072 286.2);
-    --card-foreground: oklch(0.926 0.041 90.3);
+    --card: oklch(0.2 0.012 260);
+    --card-foreground: oklch(0.95 0.005 260);
 
-    --popover: oklch(0.268 0.072 286.2);
-    --popover-foreground: oklch(0.926 0.041 90.3);
+    --popover: oklch(0.2 0.012 260);
+    --popover-foreground: oklch(0.95 0.005 260);
 
-    /* Primary shifts to the amber spark -- navy-on-navy would have no contrast here. */
-    --primary: oklch(0.765 0.126 66.9);
-    --primary-foreground: oklch(0.235 0.058 285.4);
+    --primary: oklch(0.72 0.14 260);
+    --primary-foreground: oklch(0.16 0.01 260);
 
-    --secondary: oklch(0.32 0.07 286);
-    --secondary-foreground: oklch(0.926 0.041 90.3);
+    --secondary: oklch(0.26 0.012 260);
+    --secondary-foreground: oklch(0.95 0.005 260);
 
-    --muted: oklch(0.336 0.076 285.7);
-    --muted-foreground: oklch(0.776 0.061 294.5);
+    --muted: oklch(0.26 0.012 260);
+    --muted-foreground: oklch(0.68 0.012 260);
 
-    --accent: oklch(0.34 0.05 280);
-    --accent-foreground: oklch(0.926 0.041 90.3);
+    --accent: oklch(0.3 0.02 260);
+    --accent-foreground: oklch(0.95 0.005 260);
 
     --destructive: oklch(0.65 0.2 25);
-    --destructive-foreground: oklch(0.235 0.058 285.4);
+    --destructive-foreground: oklch(0.16 0.01 260);
 
-    --border: oklch(0.336 0.076 285.7);
-    --input: oklch(0.336 0.076 285.7);
-    --ring: oklch(0.765 0.126 66.9);
+    --border: oklch(0.3 0.012 260);
+    --input: oklch(0.3 0.012 260);
+    --ring: oklch(0.72 0.14 260);
   }
 }
 
 /* next-themes toggles this class on <html> and it must win over the media query. */
 :root.dark {
-  --background: oklch(0.235 0.058 285.4);
-  --foreground: oklch(0.926 0.041 90.3);
+  --background: oklch(0.16 0.01 260);
+  --foreground: oklch(0.95 0.005 260);
 
-  --card: oklch(0.268 0.072 286.2);
-  --card-foreground: oklch(0.926 0.041 90.3);
+  --card: oklch(0.2 0.012 260);
+  --card-foreground: oklch(0.95 0.005 260);
 
-  --popover: oklch(0.268 0.072 286.2);
-  --popover-foreground: oklch(0.926 0.041 90.3);
+  --popover: oklch(0.2 0.012 260);
+  --popover-foreground: oklch(0.95 0.005 260);
 
-  --primary: oklch(0.765 0.126 66.9);
-  --primary-foreground: oklch(0.235 0.058 285.4);
+  --primary: oklch(0.72 0.14 260);
+  --primary-foreground: oklch(0.16 0.01 260);
 
-  --secondary: oklch(0.32 0.07 286);
-  --secondary-foreground: oklch(0.926 0.041 90.3);
+  --secondary: oklch(0.26 0.012 260);
+  --secondary-foreground: oklch(0.95 0.005 260);
 
-  --muted: oklch(0.336 0.076 285.7);
-  --muted-foreground: oklch(0.776 0.061 294.5);
+  --muted: oklch(0.26 0.012 260);
+  --muted-foreground: oklch(0.68 0.012 260);
 
-  --accent: oklch(0.34 0.05 280);
-  --accent-foreground: oklch(0.926 0.041 90.3);
+  --accent: oklch(0.3 0.02 260);
+  --accent-foreground: oklch(0.95 0.005 260);
 
   --destructive: oklch(0.65 0.2 25);
-  --destructive-foreground: oklch(0.235 0.058 285.4);
+  --destructive-foreground: oklch(0.16 0.01 260);
 
-  --border: oklch(0.336 0.076 285.7);
-  --input: oklch(0.336 0.076 285.7);
-  --ring: oklch(0.765 0.126 66.9);
+  --border: oklch(0.3 0.012 260);
+  --input: oklch(0.3 0.012 260);
+  --ring: oklch(0.72 0.14 260);
 }
 
 :root.light {
-  --background: oklch(0.944 0.028 88.8);
-  --foreground: oklch(0.297 0.082 285.1);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.18 0.01 260);
 
-  --card: oklch(0.99 0.006 89);
-  --card-foreground: oklch(0.297 0.082 285.1);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.01 260);
 
-  --popover: oklch(0.99 0.006 89);
-  --popover-foreground: oklch(0.297 0.082 285.1);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.01 260);
 
-  --primary: oklch(0.297 0.082 285.1);
-  --primary-foreground: oklch(0.98 0.01 89);
+  --primary: oklch(0.5 0.16 260);
+  --primary-foreground: oklch(0.98 0.005 260);
 
-  --secondary: oklch(0.909 0.049 88.8);
-  --secondary-foreground: oklch(0.297 0.082 285.1);
+  --secondary: oklch(0.96 0.005 260);
+  --secondary-foreground: oklch(0.24 0.01 260);
 
-  --muted: oklch(0.92 0.03 88);
-  --muted-foreground: oklch(0.456 0.071 289.5);
+  --muted: oklch(0.96 0.005 260);
+  --muted-foreground: oklch(0.5 0.015 260);
 
-  --accent: oklch(0.9 0.05 70);
-  --accent-foreground: oklch(0.297 0.082 285.1);
+  --accent: oklch(0.94 0.02 260);
+  --accent-foreground: oklch(0.24 0.01 260);
 
   --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.98 0.01 89);
+  --destructive-foreground: oklch(0.98 0.005 260);
 
-  --border: oklch(0.851 0.058 89.7);
-  --input: oklch(0.851 0.058 89.7);
-  --ring: oklch(0.702 0.132 61.7);
+  --border: oklch(0.9 0.005 260);
+  --input: oklch(0.9 0.005 260);
+  --ring: oklch(0.5 0.16 260);
 }
 
 @layer base {
