@@ -25,7 +25,7 @@ export default async function LoginPage({
           <div className="mb-2 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Sparkles aria-hidden="true" className="size-6" />
           </div>
-          <CardTitle className="text-xl">{appConfig.name}</CardTitle>
+          <CardTitle className="font-display text-xl">{appConfig.name}</CardTitle>
           <CardDescription>{appConfig.description}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">

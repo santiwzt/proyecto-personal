@@ -14,7 +14,7 @@ export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-border bg-background md:flex">
       <div className="flex h-16 items-center px-6">
-        <span className="text-lg font-semibold tracking-tight">{appConfig.shortName}</span>
+        <span className="font-display text-xl font-semibold tracking-tight">{appConfig.shortName}</span>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2" aria-label="Navegacion principal">
