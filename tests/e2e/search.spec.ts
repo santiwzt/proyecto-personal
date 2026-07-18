@@ -15,7 +15,7 @@ test.describe("global search", () => {
     await page.getByLabel(/^buscar$/i).press("Enter");
     await page.waitForURL(/\/buscar\?q=Fisica/);
     await expect(page.getByRole("heading", { name: /buscar/i })).toBeVisible();
-    await expect(page.getByText("Fisica", { exact: true })).toBeVisible();
+    await expect(page.locator("main").getByText("Fisica", { exact: true })).toBeVisible();
   });
 
   test("shows an empty state for a query with no matches", async ({ page }) => {

@@ -29,9 +29,9 @@ test.describe("golden path", () => {
     const subjectName = `Materia E2E ${Date.now()}`;
     await page.getByLabel(/^nombre$/i).fill(subjectName);
     await page.getByRole("button", { name: /crear materia/i }).click();
-    await expect(page.getByText(subjectName)).toBeVisible();
+    await expect(page.locator("main").getByText(subjectName)).toBeVisible();
 
-    await page.getByText(subjectName).click();
+    await page.locator("main").getByText(subjectName).click();
     await expect(page.getByRole("heading", { name: subjectName })).toBeVisible();
 
     // Create an exam for that subject.

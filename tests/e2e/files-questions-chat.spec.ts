@@ -24,7 +24,7 @@ test.describe("files, practice questions and assistant chat", () => {
     const subjectName = `Fisica E2E ${Date.now()}`;
     await page.getByLabel(/^nombre$/i).fill(subjectName);
     await page.getByRole("button", { name: /crear materia/i }).click();
-    await expect(page.getByText(subjectName)).toBeVisible();
+    await expect(page.locator("main").getByText(subjectName)).toBeVisible();
 
     // 2. Upload material for that subject.
     await page.goto("/archivos");
@@ -41,7 +41,7 @@ test.describe("files, practice questions and assistant chat", () => {
 
     // 3. Create a topic on the subject and generate practice questions from it.
     await page.goto("/estudios");
-    await page.getByRole("link", { name: new RegExp(subjectName) }).click();
+    await page.locator("main").getByRole("link", { name: new RegExp(subjectName) }).click();
     await page.getByRole("tab", { name: /^temas$/i }).click();
     await page.getByRole("button", { name: /nuevo tema/i }).click();
     await page.getByLabel(/^nombre$/i).fill("Tiro oblicuo");

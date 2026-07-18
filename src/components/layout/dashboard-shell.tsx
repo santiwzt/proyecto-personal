@@ -8,20 +8,23 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { QuickCaptureDialog } from "@/components/shared/quick-capture-dialog";
 import { HelpDialog } from "@/components/shared/help-dialog";
 import { endSession } from "@/server/actions/auth-actions";
+import type { Project, Subject } from "@/types/domain";
 
 export interface DashboardShellProps {
   user: SessionUser;
+  subjects: Subject[];
+  projects: Project[];
   children: React.ReactNode;
 }
 
 /** Responsive app shell: sidebar + topbar on desktop, topbar + bottom nav on mobile. */
-export function DashboardShell({ user, children }: DashboardShellProps) {
+export function DashboardShell({ user, subjects, projects, children }: DashboardShellProps) {
   const [captureOpen, setCaptureOpen] = React.useState(false);
   const [helpOpen, setHelpOpen] = React.useState(false);
 
   return (
     <div className="min-h-dvh md:pl-60">
-      <Sidebar />
+      <Sidebar subjects={subjects} projects={projects} />
       <Topbar
         user={user}
         onQuickCapture={() => setCaptureOpen(true)}
