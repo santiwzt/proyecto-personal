@@ -3,8 +3,8 @@ import { generateId } from "@/lib/database/demo/ids";
 import { AppError } from "@/lib/errors/app-error";
 import { isDemoMode } from "@/config/env";
 import { createSupabaseServerClient } from "@/lib/database/supabase/server";
-import type { ActivityLogEntry, AiUsageRecord, Expense, Habit } from "@/types/domain";
-import type { ActivityLogTable, AiUsageTable, ExpensesTable, HabitsTable } from "@/types/database";
+import type { ActivityLogEntry, AiUsageRecord, Expense } from "@/types/domain";
+import type { ActivityLogTable, AiUsageTable, ExpensesTable } from "@/types/database";
 
 type NewExpense = Omit<Expense, "id" | "userId" | "createdAt">;
 
@@ -67,36 +67,6 @@ export const expensesRepository = {
       .single();
     if (error) dbError("expenses.create", error);
     return mapExpense(data);
-  },
-};
-
-function mapHabit(row: HabitsTable["Row"]): Habit {
-  return {
-    id: row.id,
-    userId: row.user_id,
-    name: row.name,
-    targetPerWeek: row.target_per_week,
-    createdAt: row.created_at,
-    archivedAt: row.archived_at,
-  };
-}
-
-export const habitsRepository = {
-  async list(userId: string): Promise<Habit[]> {
-    if (isDemoMode) {
-      return getDemoStore()
-        .habits.list(userId)
-        .filter((h) => !h.archivedAt);
-    }
-    const supabase = await createSupabaseServerClient();
-    const { data, error } = await supabase
-      .from("habits")
-      .select("*")
-      .eq("user_id", userId)
-      .is("archived_at", null)
-      .order("created_at", { ascending: true });
-    if (error) dbError("habits.list", error);
-    return data.map(mapHabit);
   },
 };
 

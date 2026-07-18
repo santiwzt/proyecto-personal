@@ -189,6 +189,25 @@ export const createExpenseSchema = z.object({
 });
 export type CreateExpenseInput = z.infer<typeof createExpenseSchema>;
 
+export const createHabitSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  targetPerWeek: z.number().int().min(1).max(7).default(7),
+});
+export type CreateHabitInput = z.infer<typeof createHabitSchema>;
+
+export const createTrainingSessionSchema = z
+  .object({
+    activity: z.string().trim().min(1).max(120),
+    startsAt: isoDateTime,
+    endsAt: isoDateTime,
+    notes: z.string().trim().max(500).nullable().default(null),
+  })
+  .refine((data) => data.endsAt > data.startsAt, {
+    message: "La hora de fin debe ser posterior a la hora de inicio",
+    path: ["endsAt"],
+  });
+export type CreateTrainingSessionInput = z.infer<typeof createTrainingSessionSchema>;
+
 export const quickCaptureInputSchema = z.object({
   text: z.string().trim().min(2, "Escribi al menos unas palabras").max(500),
 });
