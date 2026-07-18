@@ -49,9 +49,11 @@ export async function POST(request: Request) {
   // Resolve authorized file ids strictly from the user's own records — never
   // trust file ids from the client without re-checking ownership here.
   let fileIds: string[] = [];
+  let subjectName: string | null = null;
   if (input.scope.type === "subject") {
     try {
-      await subjectsRepository.get(userId, input.scope.subjectId);
+      const subject = await subjectsRepository.get(userId, input.scope.subjectId);
+      subjectName = subject.name;
     } catch (error) {
       const { code, message } = toErrorResponse(error);
       return Response.json({ code, message }, { status: isAppError(error) ? error.httpStatus : 500 });
@@ -112,7 +114,7 @@ export async function POST(request: Request) {
             outputTokens: 0,
           });
         } else {
-          const heuristic = buildHeuristicChatAnswer(context, input.message, input.mode);
+          const heuristic = buildHeuristicChatAnswer(context, input.message, input.mode, subjectName);
           fullText = heuristic.content;
           sources = heuristic.sources;
           controller.enqueue(ndjson({ type: "token", text: fullText }));

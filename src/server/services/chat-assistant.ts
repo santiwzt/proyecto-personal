@@ -5,6 +5,7 @@ import {
   significantTerms,
   splitIntoSentences,
 } from "@/server/services/retrieval";
+import { buildGeneralAdvice } from "@/server/services/study-advice";
 import type { FileChunk, MessageSource } from "@/types/domain";
 
 export type ChatMode =
@@ -248,12 +249,11 @@ export function buildHeuristicChatAnswer(
   context: RetrievedContext[],
   query: string,
   mode: ChatMode,
+  subjectName: string | null = null,
 ): { content: string; sources: MessageSource[] } {
   if (context.length === 0) {
     return {
-      content:
-        "No encontre informacion suficiente en el material seleccionado para responder eso. " +
-        "Proba subir un archivo sobre el tema o elegir otro material en el selector.",
+      content: buildGeneralAdvice(subjectName),
       sources: [],
     };
   }

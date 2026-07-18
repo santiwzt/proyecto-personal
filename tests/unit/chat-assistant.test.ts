@@ -42,11 +42,12 @@ describe("chat-assistant heuristic mode", () => {
     expect(answer.content).toContain("Resumen tiro vertical.txt");
   });
 
-  it("admits when there is not enough information instead of inventing an answer", () => {
+  it("admits when there is not enough information instead of inventing an answer, but still offers general advice", () => {
     const context = retrieveChatContext(chunks, fileNameById, "¿Cuál es la capital de Francia?");
     const answer = buildHeuristicChatAnswer(context, "capital de Francia", "explicame");
     expect(answer.sources).toEqual([]);
-    expect(answer.content.toLowerCase()).toContain("no encontre informacion");
+    expect(answer.content.toLowerCase()).toContain("no tengo material");
+    expect(answer.content).not.toContain("Francia");
   });
 
   it("resumime produces a bullet-point summary instead of a raw quote", () => {
