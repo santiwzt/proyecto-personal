@@ -1,6 +1,15 @@
 import Link from "next/link";
-import { addDays, format } from "date-fns";
-import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, ListPlus } from "lucide-react";
+import { addDays, addMonths, eachDayOfInterval, format, isSameMonth } from "date-fns";
+import { es } from "date-fns/locale";
+import {
+  AlertTriangle,
+  CalendarDays,
+  CalendarRange,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  ListPlus,
+} from "lucide-react";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
@@ -9,11 +18,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AvailabilityRules } from "@/features/calendar/availability-rules";
 import { CreateEventDialog } from "@/features/calendar/create-event-dialog";
+import { MonthView, type MonthDayCell } from "@/features/calendar/month-view";
 import { PlannerPanel } from "@/features/planner/planner-panel";
 import { CreateTaskDialog } from "@/features/tasks/create-task-dialog";
 import { TaskItem } from "@/features/tasks/task-item";
 import { requireSessionUser } from "@/lib/auth/session";
-import { formatDate, formatTime, getWeekBounds } from "@/lib/dates";
+import { formatDate, formatTime, getMonthGridBounds, getWeekBounds, todayISODate } from "@/lib/dates";
 import { examsRepository, studySessionsRepository, tasksRepository } from "@/server/repositories/academic-repository";
 import { availabilityRepository, eventsRepository } from "@/server/repositories/calendar-repository";
 import { detectAllConflicts } from "@/server/services/conflict-detection";
@@ -43,14 +53,16 @@ interface DayItem {
 }
 
 interface AgendaPageProps {
-  searchParams: Promise<{ week?: string }>;
+  searchParams: Promise<{ week?: string; month?: string; view?: string }>;
 }
 
 export default async function AgendaPage({ searchParams }: AgendaPageProps) {
   const user = await requireSessionUser();
-  const { week } = await searchParams;
+  const { week, month, view: viewParam } = await searchParams;
+  const view: "week" | "month" = viewParam === "month" ? "month" : "week";
 
   const now = new Date();
+  const todayStr = todayISODate(now);
   const isValidWeekParam = !!week && /^\d{4}-\d{2}-\d{2}$/.test(week);
   const referenceDate = isValidWeekParam ? new Date(`${week}T12:00:00`) : now;
   const { start: weekStart } = getWeekBounds(referenceDate);
@@ -58,6 +70,14 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
   const weekEndStr = format(addDays(weekStart, 6), "yyyy-MM-dd");
   const prevWeekStr = format(addDays(weekStart, -7), "yyyy-MM-dd");
   const nextWeekStr = format(addDays(weekStart, 7), "yyyy-MM-dd");
+
+  const isValidMonthParam = !!month && /^\d{4}-\d{2}$/.test(month);
+  const monthDate = isValidMonthParam ? new Date(`${month}-01T12:00:00`) : now;
+  const monthAnchor = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1, 12);
+  const monthStr = format(monthAnchor, "yyyy-MM");
+  const prevMonthStr = format(addMonths(monthAnchor, -1), "yyyy-MM");
+  const nextMonthStr = format(addMonths(monthAnchor, 1), "yyyy-MM");
+  const monthLabel = format(monthAnchor, "MMMM yyyy", { locale: es });
 
   const startIso = `${weekStartStr}T00:00:00-03:00`;
   const endIso = `${weekEndStr}T23:59:59-03:00`;
@@ -81,6 +101,24 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
     studySessions,
     now,
   });
+
+  const { start: monthGridStart, end: monthGridEnd } = getMonthGridBounds(monthAnchor);
+  const monthDayCells: MonthDayCell[] = eachDayOfInterval({ start: monthGridStart, end: monthGridEnd }).map(
+    (date) => {
+      const dateStr = format(date, "yyyy-MM-dd");
+      const { start: dayWeekStart } = getWeekBounds(date);
+      return {
+        dateStr,
+        dayNumber: date.getDate(),
+        isCurrentMonth: isSameMonth(date, monthAnchor),
+        isToday: dateStr === todayStr,
+        examCount: allExams.filter((e) => e.scheduledAt.slice(0, 10) === dateStr).length,
+        eventCount: allEvents.filter((e) => e.startsAt.slice(0, 10) === dateStr).length,
+        taskCount: allTasks.filter((t) => t.dueAt?.slice(0, 10) === dateStr).length,
+        weekHref: `/agenda?view=week&week=${format(dayWeekStart, "yyyy-MM-dd")}`,
+      };
+    },
+  );
 
   const days = Array.from({ length: 7 }, (_, i) => {
     const date = addDays(weekStart, i);
@@ -123,59 +161,85 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
         }
       />
 
-      <div className="mb-6 flex items-center justify-between gap-2">
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/agenda?week=${prevWeekStr}`}>
-            <ChevronLeft className="size-4" aria-hidden="true" /> Semana anterior
+      <div className="mb-6 flex items-center gap-2">
+        <Button asChild variant={view === "week" ? "default" : "outline"} size="sm">
+          <Link href={`/agenda?view=week&week=${weekStartStr}`}>
+            <CalendarRange className="size-4" aria-hidden="true" /> Semana
           </Link>
         </Button>
-        <p className="text-sm font-medium">
-          {formatDate(startIso)} — {formatDate(`${weekEndStr}T00:00:00-03:00`)}
-        </p>
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/agenda?week=${nextWeekStr}`}>
-            Semana siguiente <ChevronRight className="size-4" aria-hidden="true" />
+        <Button asChild variant={view === "month" ? "default" : "outline"} size="sm">
+          <Link href={`/agenda?view=month&month=${monthStr}`}>
+            <CalendarDays className="size-4" aria-hidden="true" /> Mes
           </Link>
         </Button>
       </div>
 
-      <div className="mb-6">
-        <PlannerPanel weekStart={weekStartStr} />
-      </div>
+      {view === "month" ? (
+        <div className="mb-6">
+          <MonthView
+            monthLabel={monthLabel}
+            prevMonthHref={`/agenda?view=month&month=${prevMonthStr}`}
+            nextMonthHref={`/agenda?view=month&month=${nextMonthStr}`}
+            days={monthDayCells}
+          />
+        </div>
+      ) : (
+        <>
+          <div className="mb-6 flex items-center justify-between gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/agenda?view=week&week=${prevWeekStr}`}>
+                <ChevronLeft className="size-4" aria-hidden="true" /> Semana anterior
+              </Link>
+            </Button>
+            <p className="text-sm font-medium">
+              {formatDate(startIso)} — {formatDate(`${weekEndStr}T00:00:00-03:00`)}
+            </p>
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/agenda?view=week&week=${nextWeekStr}`}>
+                Semana siguiente <ChevronRight className="size-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
 
-      <div className="mb-6 grid gap-3 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-        {days.map((day) => (
-          <Card key={day.dateStr}>
-            <CardHeader className="p-3">
-              <CardTitle className="text-xs font-semibold uppercase text-muted-foreground">
-                {day.label}
-                <span className="mt-0.5 block text-sm font-normal normal-case text-foreground">
-                  {formatDate(`${day.dateStr}T00:00:00-03:00`)}
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 p-3 pt-0">
-              {day.items.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Sin eventos.</p>
-              ) : (
-                day.items.map((item) => (
-                  <div key={item.id} className="rounded-md border border-border p-2 text-xs">
-                    <p className="font-medium">{item.title}</p>
-                    <p className="text-muted-foreground">
-                      {item.kind === "exam"
-                        ? formatTime(item.startsAt)
-                        : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`}
-                    </p>
-                    <Badge variant="outline" className="mt-1">
-                      {CATEGORY_LABELS[item.category]}
-                    </Badge>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+          <div className="mb-6">
+            <PlannerPanel weekStart={weekStartStr} />
+          </div>
+
+          <div className="mb-6 grid gap-3 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+            {days.map((day) => (
+              <Card key={day.dateStr}>
+                <CardHeader className="p-3">
+                  <CardTitle className="text-xs font-semibold uppercase text-muted-foreground">
+                    {day.label}
+                    <span className="mt-0.5 block text-sm font-normal normal-case text-foreground">
+                      {formatDate(`${day.dateStr}T00:00:00-03:00`)}
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 p-3 pt-0">
+                  {day.items.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">Sin eventos.</p>
+                  ) : (
+                    day.items.map((item) => (
+                      <div key={item.id} className="rounded-md border border-border p-2 text-xs">
+                        <p className="font-medium">{item.title}</p>
+                        <p className="text-muted-foreground">
+                          {item.kind === "exam"
+                            ? formatTime(item.startsAt)
+                            : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`}
+                        </p>
+                        <Badge variant="outline" className="mt-1">
+                          {CATEGORY_LABELS[item.category]}
+                        </Badge>
+                      </div>
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

@@ -2,9 +2,12 @@ import {
   addDays,
   differenceInCalendarDays,
   differenceInMinutes,
+  endOfMonth,
+  endOfWeek,
   format,
   isBefore,
   parseISO,
+  startOfMonth,
   startOfWeek,
 } from "date-fns";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
@@ -53,6 +56,20 @@ export function getWeekBounds(date: Date): { start: Date; end: Date } {
   const start = startOfWeek(date, { weekStartsOn: appConfig.weekStartsOn });
   const end = addDays(start, 6);
   return { start, end };
+}
+
+/**
+ * Bounds of the calendar grid for the month containing `date`: the Monday
+ * on/before the 1st through the Sunday on/after the last day, so a month
+ * view always shows complete weeks.
+ */
+export function getMonthGridBounds(date: Date): { start: Date; end: Date } {
+  const monthStart = startOfMonth(date);
+  const monthEnd = endOfMonth(date);
+  return {
+    start: startOfWeek(monthStart, { weekStartsOn: appConfig.weekStartsOn }),
+    end: endOfWeek(monthEnd, { weekStartsOn: appConfig.weekStartsOn }),
+  };
 }
 
 export function isPast(iso: string, now = new Date()): boolean {
