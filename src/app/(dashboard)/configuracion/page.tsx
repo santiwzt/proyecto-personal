@@ -1,4 +1,4 @@
-import { LogOut } from "lucide-react";
+import { Download, LogOut } from "lucide-react";
 
 import { requireSessionUser } from "@/lib/auth/session";
 import { profileRepository, preferencesRepository } from "@/server/repositories/profile-repository";
@@ -10,15 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { DeleteAccountButton } from "@/features/settings/delete-account-button";
+import { EditProfileForm } from "@/features/settings/edit-profile-form";
 import { PreferencesForm } from "@/features/settings/preferences-form";
 import { PushNotificationsToggle } from "@/features/settings/push-notifications-toggle";
-
-const ROLE_LABELS: Record<string, string> = {
-  estudiante_secundario: "Estudiante secundario",
-  estudiante_universitario: "Estudiante universitario",
-  profesional: "Profesional",
-  otro: "Otro",
-};
 
 export default async function ConfiguracionPage() {
   const user = await requireSessionUser();
@@ -34,16 +29,13 @@ export default async function ConfiguracionPage() {
           <CardHeader>
             <CardTitle className="text-base">Cuenta</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Nombre</span>
-              <span className="font-medium">{profile?.displayName ?? user.displayName}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Rol</span>
-              <span>{profile ? ROLE_LABELS[profile.role] ?? profile.role : "Sin definir"}</span>
-            </div>
-            <div className="flex items-center justify-between">
+          <CardContent className="space-y-4 text-sm">
+            {profile ? (
+              <EditProfileForm profile={profile} />
+            ) : (
+              <p className="text-muted-foreground">No pudimos cargar tu perfil.</p>
+            )}
+            <div className="flex items-center justify-between border-t border-border pt-3">
               <span className="text-muted-foreground">Zona horaria</span>
               <span>{profile?.timeZone ?? appConfig.timeZone}</span>
             </div>
@@ -96,6 +88,30 @@ export default async function ConfiguracionPage() {
           </CardHeader>
           <CardContent>
             <PreferencesForm preferences={preferences} />
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-base">Tus datos</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Descarga una copia de todo lo que cargaste en la app (materias, tareas, examenes, eventos, archivos,
+              proyectos, gastos y mas) en un archivo JSON.
+            </p>
+            <Button asChild variant="outline" size="sm">
+              <a href="/api/export" download>
+                <Download className="size-4" aria-hidden="true" /> Exportar mis datos
+              </a>
+            </Button>
+
+            <div className="space-y-1.5 border-t border-border pt-3">
+              <p className="text-sm text-muted-foreground">
+                Eliminar tu cuenta borra todos tus datos para siempre. No se puede deshacer.
+              </p>
+              <DeleteAccountButton />
+            </div>
           </CardContent>
         </Card>
       </div>

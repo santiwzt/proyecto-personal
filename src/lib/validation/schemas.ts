@@ -34,6 +34,19 @@ export const updatePasswordSchema = z.object({
 });
 export type UpdatePasswordInput = z.infer<typeof updatePasswordSchema>;
 
+export const profileRoleSchema = z.enum([
+  "estudiante_secundario",
+  "estudiante_universitario",
+  "profesional",
+  "otro",
+]);
+
+export const updateProfileSchema = z.object({
+  displayName: z.string().trim().min(1, "Ingresa tu nombre").max(60),
+  role: profileRoleSchema,
+});
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
 export const pushSubscribeSchema = z.object({
   endpoint: z.string().url(),
   keys: z.object({

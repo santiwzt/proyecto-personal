@@ -192,3 +192,8 @@ export function getDemoStore(): DemoStore {
   }
   return globalThis.__nexoDemoStore;
 }
+
+/** Rebuilds the demo store from scratch (fresh seed data) -- used by "eliminar cuenta" in demo mode. */
+export function resetDemoStore(): void {
+  globalThis.__nexoDemoStore = new DemoStore();
+}

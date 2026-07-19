@@ -3,8 +3,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { env, isDemoMode, isSupabaseConfigured } from "@/config/env";
-import { DEMO_SESSION_COOKIE } from "@/lib/auth/session";
+import { DEMO_SESSION_COOKIE, requireSessionUser } from "@/lib/auth/session";
 import { DEMO_USER_ID } from "@/lib/database/demo/ids";
+import { resetDemoStore } from "@/lib/database/demo/store";
 import { AppError } from "@/lib/errors/app-error";
 import { profileRepository } from "@/server/repositories/profile-repository";
 import {
@@ -178,5 +179,39 @@ export async function endSession(): Promise<void> {
   }
   const store = await cookies();
   store.delete(DEMO_SESSION_COOKIE);
+  redirect("/login");
+}
+
+export type DeleteAccountResult = { ok: true } | { ok: false; message: string };
+
+/**
+ * Permanently deletes every row this user owns. In Supabase mode this is a
+ * single `auth.admin.deleteUser` call -- every table cascades from
+ * `profiles.id`, which itself cascades from `auth.users.id` (see the
+ * migrations), so there is nothing else to clean up manually. In demo mode
+ * there's only one shared demo user, so "deleting" it means resetting the
+ * whole in-memory store back to fresh seed data.
+ */
+export async function deleteAccountAction(): Promise<DeleteAccountResult> {
+  const user = await requireSessionUser();
+
+  if (isDemoMode) {
+    resetDemoStore();
+    const store = await cookies();
+    store.delete(DEMO_SESSION_COOKIE);
+    redirect("/login");
+  }
+
+  const { createSupabaseAdminClient } = await import("@/lib/database/supabase/admin");
+  const admin = createSupabaseAdminClient();
+  const { error } = await admin.auth.admin.deleteUser(user.userId);
+  if (error) {
+    console.error("Supabase deleteUser error:", error.status, error.message);
+    return { ok: false, message: "No pudimos eliminar tu cuenta. Intenta nuevamente en unos minutos." };
+  }
+
+  const { createSupabaseServerClient } = await import("@/lib/database/supabase/server");
+  const supabase = await createSupabaseServerClient();
+  await supabase.auth.signOut();
   redirect("/login");
 }
