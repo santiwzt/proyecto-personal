@@ -14,14 +14,16 @@ proyectos y material de estudio para proponer planes realistas, explicar
 
 ## Estado actual del proyecto
 
-MVP funcional. Corre completo en **modo demo** (sin credenciales, datos en
-memoria) y esta preparado para conectarse a un proyecto real de Supabase.
+MVP funcional, corriendo en produccion contra un proyecto real de Supabase
+(auth, base de datos, recuperacion de contraseña) con **modo demo** (sin
+credenciales, datos en memoria) disponible para probarlo sin setup.
 Ver [ROADMAP.md](./ROADMAP.md) para lo que sigue.
 
 ## Funciones implementadas
 
-- **Autenticacion**: modo demo (cookie de sesion, sin password) + scaffolding
-  completo para Supabase Auth.
+- **Autenticacion**: registro/login real contra Supabase Auth (con
+  confirmacion por email y recuperacion de contraseña), o modo demo (cookie
+  de sesion, sin password) para probar la app sin crear cuenta.
 - **Onboarding** inicial (nombre, rol).
 - **Dashboard "Hoy"**: proximo compromiso, tareas importantes, examenes
   cercanos con preparacion estimada, tiempo de estudio recomendado, progreso
@@ -32,9 +34,11 @@ Ver [ROADMAP.md](./ROADMAP.md) para lo que sigue.
   cifra misteriosa).
 - **Tareas**: prioridad, fecha limite, estado (con "vencida" calculado en
   vivo).
-- **Agenda**: eventos, disponibilidad semanal, deteccion determinística de
-  conflictos (solapamientos, fuera de disponibilidad, sobrecarga diaria,
-  examenes sin sesiones, descansos insuficientes).
+- **Agenda**: vista de semana y de mes (con el dia actual resaltado), tocar
+  un dia abre un dialogo para agregar un evento o tarea a esa fecha
+  eligiendo el horario; eventos, disponibilidad semanal, deteccion
+  determinística de conflictos (solapamientos, fuera de disponibilidad,
+  sobrecarga diaria, examenes sin sesiones, descansos insuficientes).
 - **Planificador semanal con IA**: genera una propuesta de bloques de
   estudio (con motivo explicado para cada uno) que **requiere aprobacion
   explicita** antes de tocar la agenda real. El algoritmo de planificacion
@@ -45,19 +49,25 @@ Ver [ROADMAP.md](./ROADMAP.md) para lo que sigue.
   (o un aviso honesto cuando no se puede, p. ej. un PDF escaneado).
 - **Asistente de IA basado en archivos**: chat con streaming, con fuentes
   citadas, que solo usa el material que autorizaste. Sin proveedor de IA
-  configurado, responde citando texto real de tus archivos en vez de
-  inventar nada.
+  configurado, responde citando texto real de tus archivos y, cuando no
+  encuentra nada relacionado, da consejos generales de estudio en vez de
+  simplemente disculparse.
 - **Generador de preguntas de practica** y **correccion de respuestas**
   (opcion multiple, verdadero/falso, respuesta breve, desarrollo), con pista
   antes de la solucion completa.
 - **Proyectos personales** con "proximo paso" siempre visible.
+- **Objetivos**: metas de mediano/largo plazo con fecha limite opcional y
+  seguimiento de progreso.
+- **Habitos**: registro diario, rachas, vista semanal.
+- **Entrenamiento**: sesiones con volumen semanal.
+- **Gastos**: registro con categorias (con autocompletado), presupuesto
+  mensual y grafico de gasto por categoria.
 - **Captura rapida**: interpreta frases en español natural (tareas,
   examenes, eventos, ideas, gastos) y siempre pide confirmacion antes de
   guardar.
-- **Gastos** (registro simple) y **Configuracion** (preferencias, consentimiento
-  de IA).
-- **Habitos** y **Entrenamiento**: preparados en el modelo de datos,
-  intencionalmente basicos en esta version (ver ROADMAP).
+- **Notificaciones push** (PWA instalable) para examenes/tareas proximos.
+- **Configuracion**: editar perfil, preferencias, consentimiento de IA,
+  exportar todos tus datos a JSON, eliminar la cuenta por completo.
 - Suite de tests automatizados (unitarios, de integracion, y un recorrido
   end-to-end con Playwright).
 
@@ -128,12 +138,14 @@ modo demo:
 5. Opcional: `pnpm db:generate` para regenerar `src/types/database.ts` desde
    el esquema real.
 
-**Importante**: la capa de repositorios (`src/server/repositories`) hoy
-implementa el modo demo completo. Conectar Supabase de verdad implica
-adaptar cada archivo de esa carpeta para usar `supabase-js` en vez del
-store en memoria — ver
+La capa de repositorios (`src/server/repositories`) ya implementa ambos
+modos en cada archivo (demo y Supabase real) — ver
 [docs/decisions/0002](./docs/decisions/0002-supabase-repository-deferred.md)
-y el [ROADMAP](./ROADMAP.md).
+para el contexto de por que se empezo solo con demo mode. Si ya tenes un
+proyecto de Supabase conectado, recorda correr `pnpm db:migrate` (o pegar el
+SQL nuevo en el editor de Supabase) cada vez que se agrega una migracion —
+de lo contrario las columnas/tablas nuevas no van a existir todavia del lado
+real, aunque el modo demo funcione sin problema.
 
 ## Migraciones
 

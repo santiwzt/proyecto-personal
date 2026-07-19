@@ -1,48 +1,37 @@
 # Roadmap
 
-## MVP (entregado)
+## MVP + Version 0.2 + Version 0.3 (entregado)
 
 Ver el README para la lista completa de funciones implementadas. Resumen:
-autenticacion (demo + Supabase preparado), onboarding, dashboard "Hoy",
-materias/temas/examenes con preparacion explicable, tareas, agenda con
-deteccion determinística de conflictos, planificador semanal con
-aprobacion explicita, archivos con extraccion real de texto, asistente de
-IA con fuentes citadas, generador de preguntas y correccion, proyectos con
-"proximo paso", captura rapida en español natural, gastos basico,
+autenticacion real contra Supabase (con recuperacion de contraseña) o modo
+demo, onboarding, dashboard "Hoy", materias/temas/examenes con preparacion
+explicable, tareas, agenda con vista de semana y de mes, deteccion
+determinística de conflictos, planificador semanal con aprobacion explicita,
+archivos con extraccion real de texto, asistente de IA heuristico (sin costo)
+con fuentes citadas y consejos generales cuando no hay material que coincida,
+generador de preguntas y correccion, proyectos con "proximo paso", captura
+rapida en español natural, habitos con rachas, entrenamiento con volumen
+semanal, objetivos con seguimiento de progreso, gastos con categorias,
+presupuesto mensual y grafico por categoria, notificaciones push (PWA
+instalable), editar perfil, exportar todos los datos a JSON, eliminar cuenta,
 configuracion, y una suite de tests (unit + integration + e2e).
 
-## Version 0.2 (siguiente prioridad)
+`src/server/repositories/*` ya tiene una implementacion dual demo/Supabase en
+cada archivo (no solo preparada — ver ADR 0002 para el contexto original de
+por que se diferio, y el codigo actual para el estado real).
 
-1. **Conectar un proyecto real de Supabase**: implementar
-   `src/server/repositories/*` contra `supabase-js` (las migraciones, tipos
-   y clientes ya estan listos — ver ADR 0002), migrar `getSessionUser()` a
-   sesiones reales, y sincronizar el modo demo como un modo explicito de
-   "solo lectura/reseteable" en vez del unico camino disponible.
-2. **Habitos**: registro diario (`habit_logs`, ya modelado en la base de
-   datos), rachas, vista semanal.
-3. **Entrenamiento**: sesiones (`training_sessions`, ya modelado), volumen
-   semanal, integracion con la agenda mas alla de eventos genericos.
-4. **Embeddings reales**: activar `EMBEDDING_PROVIDER` para busqueda
-   semantica sobre `file_chunks.embedding` (columna `pgvector` ya lista),
-   con la busqueda de texto completo actual como fallback cuando no este
-   configurado.
-5. **Notificaciones**: recordatorios de tareas/examenes proximos, resumen
-   diario.
+## Siguiente prioridad
 
-## Version 0.3
-
-1. **Gastos**: categorias personalizables, presupuesto mensual simple,
-   graficos basicos.
-2. **Objetivos (`goals`)**: la tabla ya existe en el esquema; falta la UI y
-   su conexion con tareas/proyectos.
-3. **Exportacion de datos del usuario** (JSON descargable: materias,
-   tareas, examenes, proyectos, archivos metadata) — ya contemplado como
-   requisito de privacidad, pendiente de implementar la UI.
-4. **Eliminacion de cuenta**: flujo completo de borrado de todos los datos
-   del usuario (relevante sobre todo en modo Supabase).
-5. **Mejoras de planificador**: resolver la limitacion conocida de
+1. **Mejoras de planificador**: resolver la limitacion conocida de
    granularidad por dia (ver ADR 0004), soporte para bloquear horarios
    fijos directamente desde la UI del planificador.
+2. **Busqueda semantica real**: deliberadamente no implementada por ahora
+   -- ver ADR 0007 (mismo problema de costo por request que el motor de IA
+   principal). El punto de entrada (`EMBEDDING_PROVIDER`, columna
+   `file_chunks.embedding`) sigue listo si se revisita mas adelante.
+3. **Objetivos conectados con tareas/proyectos**: hoy `goals` es
+   independiente; falta poder vincular un objetivo a las tareas o proyectos
+   que contribuyen a el.
 
 ## Futuro (sin comprometer fecha)
 
@@ -51,7 +40,7 @@ configuracion, y una suite de tests (unit + integration + e2e).
 - Reconocimiento de escritura (apuntes fotografiados)
 - Estadisticas deportivas mas ricas
 - Seguimiento de gimnasio (series, pesos, progresion)
-- Presupuesto personal completo
+- Presupuesto personal multi-moneda (hoy el presupuesto mensual es solo ARS)
 - Colaboracion con profesores / grupos escolares
 - Modelo de suscripcion
 - Adaptacion explicita para universidades / trabajadores (el modelo de
