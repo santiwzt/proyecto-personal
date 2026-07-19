@@ -73,7 +73,15 @@ export async function updateSchoolCalendarUrlAction(
     }
   }
 
-  await preferencesRepository.update(user.userId, { schoolCalendarIcsUrl: parsed.icsUrl });
+  try {
+    await preferencesRepository.update(user.userId, { schoolCalendarIcsUrl: parsed.icsUrl });
+  } catch (error) {
+    console.error("updateSchoolCalendarUrlAction: preferences update failed", error);
+    return {
+      ok: false,
+      message: "No pudimos guardar el calendario. Intenta nuevamente en unos minutos.",
+    };
+  }
   revalidatePath("/configuracion");
   revalidatePath("/agenda");
   return { ok: true };
