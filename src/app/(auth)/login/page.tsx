@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth/session";
@@ -19,7 +20,7 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-muted/30 p-4">
+    <main className="flex min-h-dvh flex-col items-center justify-center bg-muted/30 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
           <div className="mb-2 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -54,6 +55,17 @@ export default async function LoginPage({
           )}
         </CardContent>
       </Card>
+      <p className="mt-4 text-center text-xs text-muted-foreground">
+        Al continuar aceptas los{" "}
+        <Link href="/terminos" className="underline">
+          terminos de uso
+        </Link>{" "}
+        y la{" "}
+        <Link href="/privacidad" className="underline">
+          politica de privacidad
+        </Link>
+        .
+      </p>
     </main>
   );
 }

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Download, LogOut } from "lucide-react";
 
 import { requireSessionUser } from "@/lib/auth/session";
@@ -124,6 +125,16 @@ export default async function ConfiguracionPage() {
           Cerrar sesion
         </Button>
       </form>
+
+      <p className="mt-6 text-xs text-muted-foreground">
+        <Link href="/terminos" className="underline">
+          Terminos de uso
+        </Link>{" "}
+        ·{" "}
+        <Link href="/privacidad" className="underline">
+          Politica de privacidad
+        </Link>
+      </p>
     </div>
   );
 }

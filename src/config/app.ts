@@ -11,4 +11,6 @@ export const appConfig = {
   timeZone: "America/Argentina/Buenos_Aires",
   weekStartsOn: 1 as const, // Monday
   dateFormat: "dd/MM/yyyy",
+  /** Shown on the Terminos de uso / Politica de privacidad pages as the contact address. */
+  contactEmail: "santi.wzt@gmail.com",
 } as const;
