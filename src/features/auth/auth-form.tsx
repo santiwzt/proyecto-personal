@@ -2,19 +2,40 @@
 
 import * as React from "react";
 import { unstable_rethrow } from "next/navigation";
-import { Loader2, LogIn, UserPlus } from "lucide-react";
+import { KeyRound, Loader2, LogIn, UserPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { signInAction, signUpAction } from "@/server/actions/auth-actions";
+import { requestPasswordResetAction, signInAction, signUpAction } from "@/server/actions/auth-actions";
 
 export function AuthForm() {
   const { toast } = useToast();
   const [isPending, startTransition] = React.useTransition();
   const [confirmationEmail, setConfirmationEmail] = React.useState<string | null>(null);
+  const [forgotPassword, setForgotPassword] = React.useState(false);
+  const [resetSentTo, setResetSentTo] = React.useState<string | null>(null);
+
+  function handleForgotPassword(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const email = String(form.get("email") ?? "");
+    startTransition(async () => {
+      try {
+        const result = await requestPasswordResetAction({ email });
+        if (!result.ok) {
+          toast({ variant: "destructive", title: "No pudimos enviar el mail", description: result.message });
+          return;
+        }
+        setResetSentTo(email);
+      } catch (error) {
+        unstable_rethrow(error);
+        toast({ variant: "destructive", title: "No pudimos enviar el mail" });
+      }
+    });
+  }
 
   function handleSignIn(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -70,6 +91,48 @@ export function AuthForm() {
     );
   }
 
+  if (resetSentTo) {
+    return (
+      <div className="flex flex-col items-center gap-2 text-center">
+        <p className="text-sm text-foreground">
+          Si <strong>{resetSentTo}</strong> tiene una cuenta, te enviamos un mail para restablecer la contraseña.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Abrilo y toca el enlace para elegir una nueva contraseña.
+        </p>
+        <Button type="button" variant="link" size="sm" onClick={() => setResetSentTo(null)}>
+          Volver
+        </Button>
+      </div>
+    );
+  }
+
+  if (forgotPassword) {
+    return (
+      <form onSubmit={handleForgotPassword} className="flex flex-col gap-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="forgot-email">Email</Label>
+          <Input
+            id="forgot-email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="vos@email.com"
+            autoFocus
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <KeyRound aria-hidden="true" />}
+          Enviar link para restablecer
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setForgotPassword(false)}>
+          Volver a iniciar sesion
+        </Button>
+      </form>
+    );
+  }
+
   return (
     <Tabs defaultValue="signin" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
@@ -97,6 +160,9 @@ export function AuthForm() {
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <LogIn aria-hidden="true" />}
             Iniciar sesion
+          </Button>
+          <Button type="button" variant="link" size="sm" onClick={() => setForgotPassword(true)}>
+            ¿Olvidaste tu contraseña?
           </Button>
         </form>
       </TabsContent>

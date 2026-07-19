@@ -24,6 +24,16 @@ export const signInSchema = z.object({
 });
 export type SignInInput = z.infer<typeof signInSchema>;
 
+export const requestPasswordResetSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Email invalido"),
+});
+export type RequestPasswordResetInput = z.infer<typeof requestPasswordResetSchema>;
+
+export const updatePasswordSchema = z.object({
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres").max(72),
+});
+export type UpdatePasswordInput = z.infer<typeof updatePasswordSchema>;
+
 export const pushSubscribeSchema = z.object({
   endpoint: z.string().url(),
   keys: z.object({

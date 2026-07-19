@@ -7,7 +7,16 @@ import { DEMO_SESSION_COOKIE } from "@/lib/auth/session";
 import { DEMO_USER_ID } from "@/lib/database/demo/ids";
 import { AppError } from "@/lib/errors/app-error";
 import { profileRepository } from "@/server/repositories/profile-repository";
-import { signInSchema, signUpSchema, type SignInInput, type SignUpInput } from "@/lib/validation/schemas";
+import {
+  requestPasswordResetSchema,
+  signInSchema,
+  signUpSchema,
+  updatePasswordSchema,
+  type RequestPasswordResetInput,
+  type SignInInput,
+  type SignUpInput,
+  type UpdatePasswordInput,
+} from "@/lib/validation/schemas";
 
 const THIRTY_DAYS_SECONDS = 60 * 60 * 24 * 30;
 
@@ -112,6 +121,51 @@ export async function signInAction(input: SignInInput): Promise<SignInResult> {
   if (error) {
     console.error("Supabase signIn error:", error.status, error.message);
     return { ok: false, message: translateAuthError(error.message) };
+  }
+  redirect("/hoy");
+}
+
+export type RequestPasswordResetResult = { ok: true } | { ok: false; message: string };
+
+/**
+ * Always reports success (even in demo mode, even when Supabase reports an
+ * error) so the response can never be used to check whether an email is
+ * registered -- a real error is still logged server-side for diagnosis.
+ */
+export async function requestPasswordResetAction(input: RequestPasswordResetInput): Promise<RequestPasswordResetResult> {
+  if (!isSupabaseConfigured) {
+    return { ok: false, message: "Esta funcion no esta disponible en modo demo." };
+  }
+  const parsed = requestPasswordResetSchema.parse(input);
+
+  const { createSupabaseServerClient } = await import("@/lib/database/supabase/server");
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.email, {
+    redirectTo: `${env.NEXT_PUBLIC_APP_URL}/auth/confirm?next=${encodeURIComponent("/restablecer-contrasena")}`,
+  });
+  if (error) {
+    console.error("Supabase resetPasswordForEmail error:", error.status, error.message);
+  }
+  return { ok: true };
+}
+
+export type UpdatePasswordResult = { ok: true } | { ok: false; message: string };
+
+export async function updatePasswordAction(input: UpdatePasswordInput): Promise<UpdatePasswordResult> {
+  if (!isSupabaseConfigured) {
+    return { ok: false, message: "Esta funcion no esta disponible en modo demo." };
+  }
+  const parsed = updatePasswordSchema.parse(input);
+
+  const { createSupabaseServerClient } = await import("@/lib/database/supabase/server");
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.password });
+  if (error) {
+    console.error("Supabase updateUser error:", error.status, error.message);
+    return {
+      ok: false,
+      message: "No pudimos actualizar tu contraseña. El link puede haber vencido -- pedi uno nuevo desde el login.",
+    };
   }
   redirect("/hoy");
 }
