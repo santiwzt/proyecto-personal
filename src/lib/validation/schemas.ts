@@ -231,6 +231,18 @@ export const createTrainingSessionSchema = z
   });
 export type CreateTrainingSessionInput = z.infer<typeof createTrainingSessionSchema>;
 
+export const createGoalSchema = z.object({
+  title: z.string().trim().min(1, "El titulo es obligatorio").max(150),
+  description: z.string().trim().max(1000).nullable().default(null),
+  targetDate: isoDate.nullable().default(null),
+});
+export type CreateGoalInput = z.infer<typeof createGoalSchema>;
+
+export const updateGoalProgressSchema = z.object({
+  progress: z.number().int().min(0).max(100),
+});
+export type UpdateGoalProgressInput = z.infer<typeof updateGoalProgressSchema>;
+
 export const quickCaptureInputSchema = z.object({
   text: z.string().trim().min(2, "Escribi al menos unas palabras").max(500),
 });
