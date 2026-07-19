@@ -19,27 +19,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AvailabilityRules } from "@/features/calendar/availability-rules";
 import { CreateEventDialog } from "@/features/calendar/create-event-dialog";
 import { MonthView, type MonthDayCell } from "@/features/calendar/month-view";
+import { WeekDayCard } from "@/features/calendar/week-day-card";
 import { PlannerPanel } from "@/features/planner/planner-panel";
 import { CreateTaskDialog } from "@/features/tasks/create-task-dialog";
 import { TaskItem } from "@/features/tasks/task-item";
 import { requireSessionUser } from "@/lib/auth/session";
-import { formatDate, formatTime, getMonthGridBounds, getWeekBounds, todayISODate } from "@/lib/dates";
+import { formatDate, getMonthGridBounds, getWeekBounds, todayISODate } from "@/lib/dates";
 import { examsRepository, studySessionsRepository, tasksRepository } from "@/server/repositories/academic-repository";
 import { availabilityRepository, eventsRepository } from "@/server/repositories/calendar-repository";
 import { detectAllConflicts } from "@/server/services/conflict-detection";
 import { deriveEffectiveTaskStatus } from "@/server/services/task-status";
 import type { EventCategory } from "@/types/domain";
-
-const CATEGORY_LABELS: Record<EventCategory, string> = {
-  clase: "Clase",
-  examen: "Examen",
-  entrenamiento: "Entrenamiento",
-  partido: "Partido",
-  estudio: "Estudio",
-  proyecto: "Proyecto",
-  personal: "Personal",
-  otro: "Otro",
-};
 
 const WEEKDAYS_ES = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
 
@@ -207,35 +197,13 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
 
           <div className="mb-6 grid gap-3 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
             {days.map((day) => (
-              <Card key={day.dateStr}>
-                <CardHeader className="p-3">
-                  <CardTitle className="text-xs font-semibold uppercase text-muted-foreground">
-                    {day.label}
-                    <span className="mt-0.5 block text-sm font-normal normal-case text-foreground">
-                      {formatDate(`${day.dateStr}T00:00:00-03:00`)}
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 p-3 pt-0">
-                  {day.items.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">Sin eventos.</p>
-                  ) : (
-                    day.items.map((item) => (
-                      <div key={item.id} className="rounded-md border border-border p-2 text-xs">
-                        <p className="font-medium">{item.title}</p>
-                        <p className="text-muted-foreground">
-                          {item.kind === "exam"
-                            ? formatTime(item.startsAt)
-                            : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`}
-                        </p>
-                        <Badge variant="outline" className="mt-1">
-                          {CATEGORY_LABELS[item.category]}
-                        </Badge>
-                      </div>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
+              <WeekDayCard
+                key={day.dateStr}
+                dateStr={day.dateStr}
+                label={day.label}
+                items={day.items}
+                isToday={day.dateStr === todayStr}
+              />
             ))}
           </div>
         </>

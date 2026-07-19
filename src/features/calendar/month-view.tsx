@@ -1,8 +1,20 @@
+"use client";
+
+import * as React from "react";
 import Link from "next/link";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { DayQuickAddDialog, type DayQuickAddTarget } from "@/features/calendar/day-quick-add-dialog";
 import { cn } from "@/lib/utils";
+
+/** Builds a label like "lunes 20 de julio" from a "yyyy-MM-dd" string using local date parts, avoiding UTC-parsing day shifts. */
+function dayLabel(dateStr: string): string {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return format(new Date(year!, month! - 1, day!), "EEEE d 'de' MMMM", { locale: es });
+}
 
 const WEEKDAY_HEADERS = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
 
@@ -25,6 +37,8 @@ export interface MonthViewProps {
 }
 
 export function MonthView({ monthLabel, prevMonthHref, nextMonthHref, days }: MonthViewProps) {
+  const [selected, setSelected] = React.useState<MonthDayCell | null>(null);
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-2">
@@ -53,12 +67,14 @@ export function MonthView({ monthLabel, prevMonthHref, nextMonthHref, days }: Mo
         {days.map((day) => {
           const total = day.examCount + day.eventCount + day.taskCount;
           return (
-            <Link
+            <button
               key={day.dateStr}
-              href={day.weekHref}
+              type="button"
+              onClick={() => setSelected(day)}
               className={cn(
                 "flex min-h-20 flex-col gap-1 bg-background p-1.5 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset sm:min-h-24 sm:p-2",
                 !day.isCurrentMonth && "bg-muted/40 text-muted-foreground",
+                day.isToday && "bg-primary/10 ring-1 ring-inset ring-primary/50",
               )}
             >
               <span
@@ -88,10 +104,21 @@ export function MonthView({ monthLabel, prevMonthHref, nextMonthHref, days }: Mo
                   ) : null}
                 </div>
               ) : null}
-            </Link>
+            </button>
           );
         })}
       </div>
+
+      <DayQuickAddDialog
+        target={
+          selected
+            ? ({ dateStr: selected.dateStr, dateLabel: dayLabel(selected.dateStr), weekHref: selected.weekHref } satisfies DayQuickAddTarget)
+            : null
+        }
+        onOpenChange={(open) => {
+          if (!open) setSelected(null);
+        }}
+      />
     </div>
   );
 }
