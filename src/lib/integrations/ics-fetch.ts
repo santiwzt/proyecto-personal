@@ -51,6 +51,11 @@ export async function fetchIcsText(rawUrl: string, options?: { revalidateSeconds
     if (error instanceof Error && error.name === "AbortError") {
       throw new IcsFetchError("El calendario del colegio tardo demasiado en responder.");
     }
+    console.error(
+      "ics-fetch error:",
+      error,
+      error instanceof Error ? { name: error.name, message: error.message, cause: error.cause } : undefined,
+    );
     throw new IcsFetchError("No pudimos leer el calendario del colegio.");
   } finally {
     clearTimeout(timeout);
