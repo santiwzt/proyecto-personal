@@ -6,6 +6,7 @@ import { es } from "date-fns/locale";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DayQuickAddDialog, type DayQuickAddExistingItem } from "@/features/calendar/day-quick-add-dialog";
 import { formatDate, formatTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const CATEGORY_LABELS: Record<EventCategory, string> = {
 export interface WeekDayCardItem {
   id: string;
   title: string;
+  description?: string | null;
   startsAt: string;
   endsAt: string;
   category: EventCategory | null;
@@ -83,30 +85,43 @@ export function WeekDayCard({ dateStr, label, items, isToday }: WeekDayCardProps
           {items.length === 0 ? (
             <p className="text-xs text-muted-foreground">Sin eventos.</p>
           ) : (
-            items.map((item) => (
-              <div key={item.id} className="rounded-md border border-border p-2 text-xs">
-                <p className="font-medium">{item.title}</p>
-                <p className="text-muted-foreground">
-                  {item.isFullDay
-                    ? "Todo el dia"
-                    : item.kind === "exam"
-                      ? formatTime(item.startsAt)
-                      : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`}
-                </p>
-                {item.kind === "colegio" ? (
-                  <Badge
-                    variant="outline"
-                    className="mt-1 border-violet-500/30 bg-violet-500/15 text-violet-700 dark:text-violet-300"
-                  >
-                    Colegio
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="mt-1">
-                    {CATEGORY_LABELS[item.category!]}
-                  </Badge>
-                )}
-              </div>
-            ))
+            <TooltipProvider delayDuration={250}>
+              {items.map((item) => {
+                const body = (
+                  <div className="rounded-md border border-border p-2 text-xs">
+                    <p className="font-medium">{item.title}</p>
+                    <p className="text-muted-foreground">
+                      {item.isFullDay
+                        ? "Todo el dia"
+                        : item.kind === "exam"
+                          ? formatTime(item.startsAt)
+                          : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`}
+                    </p>
+                    {item.kind === "colegio" ? (
+                      <Badge
+                        variant="outline"
+                        className="mt-1 border-violet-500/30 bg-violet-500/15 text-violet-700 dark:text-violet-300"
+                      >
+                        Colegio
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="mt-1">
+                        {CATEGORY_LABELS[item.category!]}
+                      </Badge>
+                    )}
+                  </div>
+                );
+                if (!item.description) return <React.Fragment key={item.id}>{body}</React.Fragment>;
+                return (
+                  <Tooltip key={item.id}>
+                    <TooltipTrigger asChild>{body}</TooltipTrigger>
+                    <TooltipContent className="max-w-64 text-left">
+                      <p className="whitespace-pre-line text-muted-foreground">{item.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </TooltipProvider>
           )}
         </CardContent>
       </Card>

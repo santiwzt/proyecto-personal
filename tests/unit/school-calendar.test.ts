@@ -17,6 +17,7 @@ DTSTAMP:20260101T000000Z
 DTSTART:20260910T130000Z
 DTEND:20260910T150000Z
 SUMMARY:Evaluacion de TIC
+DESCRIPTION:Trae calculadora y el capitulo 4 impreso.
 END:VEVENT
 BEGIN:VEVENT
 UID:weekly-1@test
@@ -41,6 +42,7 @@ describe("school-calendar", () => {
     expect(holiday).toEqual({
       uid: "holiday-1@test",
       title: "Feriado",
+      description: null,
       startsAt: "2026-09-01T00:00:00-03:00",
       endsAt: "2026-09-01T23:59:59-03:00",
       isFullDay: true,
@@ -58,6 +60,7 @@ describe("school-calendar", () => {
     expect(exam).toEqual({
       uid: "exam-1@test",
       title: "Evaluacion de TIC",
+      description: "Trae calculadora y el capitulo 4 impreso.",
       startsAt: "2026-09-10T10:00:00-03:00",
       endsAt: "2026-09-10T12:00:00-03:00",
       isFullDay: false,

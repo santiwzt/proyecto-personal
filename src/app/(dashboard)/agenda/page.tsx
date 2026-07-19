@@ -36,9 +36,12 @@ import type { EventCategory } from "@/types/domain";
 
 const WEEKDAYS_ES = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
 
+const EXAM_IMPORTANCE_LABELS: Record<string, string> = { baja: "Baja", media: "Media", alta: "Alta" };
+
 interface DayItem {
   id: string;
   title: string;
+  description?: string | null;
   startsAt: string;
   endsAt: string;
   category: EventCategory | null;
@@ -123,6 +126,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
           .map((e) => ({
             id: e.id,
             title: e.title,
+            description: e.notes,
             startsAt: e.startsAt,
             endsAt: e.endsAt,
             category: e.category as EventCategory | null,
@@ -133,6 +137,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
           .map((e) => ({
             id: e.id,
             title: `Examen: ${e.title}`,
+            description: `Duracion: ${e.durationMinutes} min · Importancia: ${EXAM_IMPORTANCE_LABELS[e.importance] ?? e.importance}`,
             startsAt: e.scheduledAt,
             endsAt: e.scheduledAt,
             category: "examen" as EventCategory | null,
@@ -143,6 +148,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
           .map((t) => ({
             id: t.id,
             title: t.title,
+            description: t.description,
             startsAt: t.dueAt!,
             endsAt: t.dueAt!,
             category: null,
@@ -153,6 +159,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
           .map((e) => ({
             id: e.uid,
             title: e.title,
+            description: e.description,
             startsAt: e.startsAt,
             endsAt: e.endsAt,
             category: null,
@@ -180,6 +187,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
         .map((e) => ({
           id: e.id,
           title: e.title,
+          description: e.notes,
           startsAt: e.startsAt,
           endsAt: e.endsAt,
           category: e.category as EventCategory | null,
@@ -190,6 +198,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
         .map((e) => ({
           id: e.id,
           title: `Examen: ${e.title}`,
+          description: `Duracion: ${e.durationMinutes} min · Importancia: ${EXAM_IMPORTANCE_LABELS[e.importance] ?? e.importance}`,
           startsAt: e.scheduledAt,
           endsAt: e.scheduledAt,
           category: "examen" as EventCategory | null,
@@ -200,6 +209,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
         .map((e) => ({
           id: e.uid,
           title: e.title,
+          description: e.description,
           startsAt: e.startsAt,
           endsAt: e.endsAt,
           category: null,

@@ -5,6 +5,7 @@ import { APP_TIME_ZONE } from "@/lib/dates";
 export interface SchoolCalendarEvent {
   uid: string;
   title: string;
+  description: string | null;
   startsAt: string;
   endsAt: string;
   isFullDay: boolean;
@@ -18,6 +19,12 @@ export function parseIcsCalendar(icsText: string): CalendarResponse {
 function summaryText(summary: VEvent["summary"]): string {
   if (!summary) return "Evento del colegio";
   return typeof summary === "string" ? summary : (summary.val ?? "Evento del colegio");
+}
+
+function descriptionText(description: VEvent["description"]): string | null {
+  if (!description) return null;
+  const text = typeof description === "string" ? description : description.val;
+  return text && text.trim().length > 0 ? text.trim() : null;
 }
 
 /** Y/M/D read back with the same local interpretation used to construct the Date, so it's correct regardless of the server process's timezone. */
@@ -59,6 +66,8 @@ export function expandSchoolCalendarEvents(
     const vevent = component;
     const instances = ical.expandRecurringEvent(vevent, { from: queryFrom, to: queryTo });
 
+    const description = descriptionText(vevent.description);
+
     for (const instance of instances) {
       if (instance.isFullDay) {
         const dateStr = fullDayDateStr(instance.start);
@@ -66,6 +75,7 @@ export function expandSchoolCalendarEvents(
         events.push({
           uid: vevent.uid,
           title: summaryText(instance.summary),
+          description,
           startsAt: `${dateStr}T00:00:00-03:00`,
           endsAt: `${dateStr}T23:59:59-03:00`,
           isFullDay: true,
@@ -76,6 +86,7 @@ export function expandSchoolCalendarEvents(
       events.push({
         uid: vevent.uid,
         title: summaryText(instance.summary),
+        description,
         startsAt: formatInTimeZone(instance.start, APP_TIME_ZONE, "yyyy-MM-dd'T'HH:mm:ssXXX"),
         endsAt: formatInTimeZone(instance.end, APP_TIME_ZONE, "yyyy-MM-dd'T'HH:mm:ssXXX"),
         isFullDay: false,
