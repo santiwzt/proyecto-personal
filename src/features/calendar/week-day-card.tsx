@@ -27,8 +27,9 @@ export interface WeekDayCardItem {
   title: string;
   startsAt: string;
   endsAt: string;
-  category: EventCategory;
-  kind: "event" | "exam";
+  category: EventCategory | null;
+  kind: "event" | "exam" | "colegio";
+  isFullDay?: boolean;
 }
 
 interface WeekDayCardProps {
@@ -86,13 +87,24 @@ export function WeekDayCard({ dateStr, label, items, isToday }: WeekDayCardProps
               <div key={item.id} className="rounded-md border border-border p-2 text-xs">
                 <p className="font-medium">{item.title}</p>
                 <p className="text-muted-foreground">
-                  {item.kind === "exam"
-                    ? formatTime(item.startsAt)
-                    : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`}
+                  {item.isFullDay
+                    ? "Todo el dia"
+                    : item.kind === "exam"
+                      ? formatTime(item.startsAt)
+                      : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`}
                 </p>
-                <Badge variant="outline" className="mt-1">
-                  {CATEGORY_LABELS[item.category]}
-                </Badge>
+                {item.kind === "colegio" ? (
+                  <Badge
+                    variant="outline"
+                    className="mt-1 border-violet-500/30 bg-violet-500/15 text-violet-700 dark:text-violet-300"
+                  >
+                    Colegio
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="mt-1">
+                    {CATEGORY_LABELS[item.category!]}
+                  </Badge>
+                )}
               </div>
             ))
           )}

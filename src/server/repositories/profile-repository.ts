@@ -62,6 +62,7 @@ function mapPreferences(row: UserPreferencesTable["Row"]): Omit<UserPreferences,
     dailyStudyLimitMinutes: row.daily_study_limit_minutes,
     aiConsentGiven: row.ai_consent_given,
     monthlyBudgetArs: row.monthly_budget_ars,
+    schoolCalendarIcsUrl: row.school_calendar_ics_url,
   };
 }
 
@@ -105,6 +106,7 @@ export const preferencesRepository = {
     if (patch.dailyStudyLimitMinutes !== undefined) dbPatch.daily_study_limit_minutes = patch.dailyStudyLimitMinutes;
     if (patch.aiConsentGiven !== undefined) dbPatch.ai_consent_given = patch.aiConsentGiven;
     if (patch.monthlyBudgetArs !== undefined) dbPatch.monthly_budget_ars = patch.monthlyBudgetArs;
+    if (patch.schoolCalendarIcsUrl !== undefined) dbPatch.school_calendar_ics_url = patch.schoolCalendarIcsUrl;
     const { error } = await supabase.from("user_preferences").update(dbPatch).eq("user_id", userId);
     if (error) dbError("preferences.update", error);
     return this.get(userId);

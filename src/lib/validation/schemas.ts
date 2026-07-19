@@ -47,6 +47,11 @@ export const updateProfileSchema = z.object({
 });
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 
+export const updateSchoolCalendarUrlSchema = z.object({
+  icsUrl: z.string().trim().url("Ingresa una URL valida").max(2000).nullable(),
+});
+export type UpdateSchoolCalendarUrlInput = z.infer<typeof updateSchoolCalendarUrlSchema>;
+
 export const pushSubscribeSchema = z.object({
   endpoint: z.string().url(),
   keys: z.object({

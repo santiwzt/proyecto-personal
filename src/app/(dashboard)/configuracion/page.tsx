@@ -15,6 +15,7 @@ import { DeleteAccountButton } from "@/features/settings/delete-account-button";
 import { EditProfileForm } from "@/features/settings/edit-profile-form";
 import { PreferencesForm } from "@/features/settings/preferences-form";
 import { PushNotificationsToggle } from "@/features/settings/push-notifications-toggle";
+import { SchoolCalendarForm } from "@/features/settings/school-calendar-form";
 
 export default async function ConfiguracionPage() {
   const user = await requireSessionUser();
@@ -89,6 +90,15 @@ export default async function ConfiguracionPage() {
           </CardHeader>
           <CardContent>
             <PreferencesForm preferences={preferences} />
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-base">Calendario del colegio</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SchoolCalendarForm schoolCalendarIcsUrl={preferences.schoolCalendarIcsUrl} />
           </CardContent>
         </Card>
 

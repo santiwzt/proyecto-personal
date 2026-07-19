@@ -3,14 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { requireSessionUser } from "@/lib/auth/session";
 import { AppError } from "@/lib/errors/app-error";
+import { fetchIcsText } from "@/lib/integrations/ics-fetch";
 import {
   createExpenseSchema,
   updateProfileSchema,
+  updateSchoolCalendarUrlSchema,
   type CreateExpenseInput,
   type UpdateProfileInput,
+  type UpdateSchoolCalendarUrlInput,
 } from "@/lib/validation/schemas";
 import { expensesRepository } from "@/server/repositories/misc-repository";
 import { preferencesRepository, profileRepository } from "@/server/repositories/profile-repository";
+import { parseIcsCalendar } from "@/server/services/school-calendar";
 import type { Expense, Profile, UserPreferences } from "@/types/domain";
 
 export async function createExpenseAction(input: CreateExpenseInput): Promise<Expense> {
@@ -44,4 +48,33 @@ export async function updateProfileAction(input: UpdateProfileInput): Promise<Pr
   const updated = await profileRepository.upsert(user.userId, parsed);
   revalidatePath("/configuracion");
   return updated;
+}
+
+export type UpdateSchoolCalendarUrlResult = { ok: true } | { ok: false; message: string };
+
+export async function updateSchoolCalendarUrlAction(
+  input: UpdateSchoolCalendarUrlInput,
+): Promise<UpdateSchoolCalendarUrlResult> {
+  const user = await requireSessionUser();
+  const parsed = updateSchoolCalendarUrlSchema.parse(input);
+
+  if (parsed.icsUrl) {
+    try {
+      const icsText = await fetchIcsText(parsed.icsUrl);
+      const calendar = parseIcsCalendar(icsText);
+      const hasEvents = Object.values(calendar).some(
+        (component) => component && typeof component === "object" && component.type === "VEVENT",
+      );
+      if (!hasEvents) {
+        return { ok: false, message: "Esa URL no tiene ningun evento -- revisa que sea el link correcto." };
+      }
+    } catch (error) {
+      return { ok: false, message: error instanceof Error ? error.message : "No pudimos leer ese calendario." };
+    }
+  }
+
+  await preferencesRepository.update(user.userId, { schoolCalendarIcsUrl: parsed.icsUrl });
+  revalidatePath("/configuracion");
+  revalidatePath("/agenda");
+  return { ok: true };
 }

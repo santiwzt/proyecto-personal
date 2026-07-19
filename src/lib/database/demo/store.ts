@@ -121,6 +121,7 @@ export class DemoStore {
       preferredStudyWindows: [],
       aiConsentGiven: false,
       monthlyBudgetArs: null,
+      schoolCalendarIcsUrl: null,
     });
   }
 
@@ -163,6 +164,7 @@ export class DemoStore {
           preferredStudyWindows: [],
           aiConsentGiven: false,
           monthlyBudgetArs: null,
+          schoolCalendarIcsUrl: null,
           ...patch,
         };
     this.preferences.set(userId, updated);

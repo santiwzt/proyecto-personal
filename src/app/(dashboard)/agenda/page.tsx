@@ -25,9 +25,12 @@ import { CreateTaskDialog } from "@/features/tasks/create-task-dialog";
 import { TaskItem } from "@/features/tasks/task-item";
 import { requireSessionUser } from "@/lib/auth/session";
 import { formatDate, getMonthGridBounds, getWeekBounds, todayISODate } from "@/lib/dates";
+import { fetchIcsText } from "@/lib/integrations/ics-fetch";
 import { examsRepository, studySessionsRepository, tasksRepository } from "@/server/repositories/academic-repository";
 import { availabilityRepository, eventsRepository } from "@/server/repositories/calendar-repository";
+import { preferencesRepository } from "@/server/repositories/profile-repository";
 import { detectAllConflicts } from "@/server/services/conflict-detection";
+import { expandSchoolCalendarEvents, parseIcsCalendar } from "@/server/services/school-calendar";
 import { deriveEffectiveTaskStatus } from "@/server/services/task-status";
 import type { EventCategory } from "@/types/domain";
 
@@ -38,8 +41,9 @@ interface DayItem {
   title: string;
   startsAt: string;
   endsAt: string;
-  category: EventCategory;
-  kind: "event" | "exam";
+  category: EventCategory | null;
+  kind: "event" | "exam" | "colegio";
+  isFullDay?: boolean;
 }
 
 interface AgendaPageProps {
@@ -93,6 +97,22 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
   });
 
   const { start: monthGridStart, end: monthGridEnd } = getMonthGridBounds(monthAnchor);
+
+  const preferences = await preferencesRepository.get(user.userId);
+  let schoolCalendarError: string | null = null;
+  let schoolEvents: ReturnType<typeof expandSchoolCalendarEvents> = [];
+  if (preferences.schoolCalendarIcsUrl) {
+    try {
+      const icsText = await fetchIcsText(preferences.schoolCalendarIcsUrl, { revalidateSeconds: 900 });
+      const calendar = parseIcsCalendar(icsText);
+      schoolEvents = expandSchoolCalendarEvents(calendar, monthGridStart, monthGridEnd);
+    } catch (error) {
+      schoolCalendarError =
+        error instanceof Error ? error.message : "No pudimos leer el calendario del colegio.";
+    }
+  }
+  const weekSchoolEvents = schoolEvents.filter((e) => e.startsAt >= startIso && e.startsAt <= endIso);
+
   const monthDayCells: MonthDayCell[] = eachDayOfInterval({ start: monthGridStart, end: monthGridEnd }).map(
     (date) => {
       const dateStr = format(date, "yyyy-MM-dd");
@@ -105,6 +125,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
         examCount: allExams.filter((e) => e.scheduledAt.slice(0, 10) === dateStr).length,
         eventCount: allEvents.filter((e) => e.startsAt.slice(0, 10) === dateStr).length,
         taskCount: allTasks.filter((t) => t.dueAt?.slice(0, 10) === dateStr).length,
+        schoolCount: schoolEvents.filter((e) => e.startsAt.slice(0, 10) === dateStr).length,
         weekHref: `/agenda?view=week&week=${format(dayWeekStart, "yyyy-MM-dd")}`,
       };
     },
@@ -121,7 +142,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
           title: e.title,
           startsAt: e.startsAt,
           endsAt: e.endsAt,
-          category: e.category,
+          category: e.category as EventCategory | null,
           kind: "event" as const,
         })),
       ...weekExams
@@ -131,8 +152,19 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
           title: `Examen: ${e.title}`,
           startsAt: e.scheduledAt,
           endsAt: e.scheduledAt,
-          category: "examen" as const,
+          category: "examen" as EventCategory | null,
           kind: "exam" as const,
+        })),
+      ...weekSchoolEvents
+        .filter((e) => e.startsAt.slice(0, 10) === dateStr)
+        .map((e) => ({
+          id: e.uid,
+          title: e.title,
+          startsAt: e.startsAt,
+          endsAt: e.endsAt,
+          category: null,
+          kind: "colegio" as const,
+          isFullDay: e.isFullDay,
         })),
     ].sort((a, b) => a.startsAt.localeCompare(b.startsAt));
     return { dateStr, label: WEEKDAYS_ES[i]!, items };
@@ -150,6 +182,13 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
           </>
         }
       />
+
+      {schoolCalendarError ? (
+        <p className="mb-4 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <AlertTriangle className="size-4 shrink-0" aria-hidden="true" />
+          No pudimos leer el calendario del colegio: {schoolCalendarError} Revisa la URL en Configuracion.
+        </p>
+      ) : null}
 
       <div className="mb-6 flex items-center gap-2">
         <Button asChild variant={view === "week" ? "default" : "outline"} size="sm">

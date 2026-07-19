@@ -27,6 +27,8 @@ export interface UserPreferences {
   aiConsentGiven: boolean;
   /** Monthly spending budget in ARS, the app's default currency. Null means no budget set. */
   monthlyBudgetArs: number | null;
+  /** URL to an external .ics feed (e.g. a school's virtual campus calendar) merged read-only into Agenda. Null means none configured. */
+  schoolCalendarIcsUrl: string | null;
 }
 
 export type SubjectColor =

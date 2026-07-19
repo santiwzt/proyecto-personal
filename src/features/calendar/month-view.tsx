@@ -26,6 +26,7 @@ export interface MonthDayCell {
   examCount: number;
   eventCount: number;
   taskCount: number;
+  schoolCount: number;
   weekHref: string;
 }
 
@@ -65,7 +66,7 @@ export function MonthView({ monthLabel, prevMonthHref, nextMonthHref, days }: Mo
 
       <div className="grid grid-cols-7 gap-px overflow-hidden rounded-md border border-t-0 border-border bg-border">
         {days.map((day) => {
-          const total = day.examCount + day.eventCount + day.taskCount;
+          const total = day.examCount + day.eventCount + day.taskCount + day.schoolCount;
           return (
             <button
               key={day.dateStr}
@@ -101,6 +102,11 @@ export function MonthView({ monthLabel, prevMonthHref, nextMonthHref, days }: Mo
                   {day.taskCount > 0 ? (
                     <span className="rounded-sm bg-muted px-1 text-[10px] font-medium text-muted-foreground">
                       {day.taskCount} tarea{day.taskCount > 1 ? "s" : ""}
+                    </span>
+                  ) : null}
+                  {day.schoolCount > 0 ? (
+                    <span className="rounded-sm border border-violet-500/30 bg-violet-500/15 px-1 text-[10px] font-medium text-violet-700 dark:text-violet-300">
+                      {day.schoolCount} colegio
                     </span>
                   ) : null}
                 </div>

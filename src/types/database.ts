@@ -145,6 +145,7 @@ export interface UserPreferencesTable {
     daily_study_limit_minutes: number;
     ai_consent_given: boolean;
     monthly_budget_ars: number | null;
+    school_calendar_ics_url: string | null;
     created_at: string;
   };
   Insert: {
@@ -156,6 +157,7 @@ export interface UserPreferencesTable {
     daily_study_limit_minutes?: number;
     ai_consent_given?: boolean;
     monthly_budget_ars?: number | null;
+    school_calendar_ics_url?: string | null;
     created_at?: string;
   };
   Update: Partial<UserPreferencesTable["Insert"]>;

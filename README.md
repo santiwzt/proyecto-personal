@@ -36,7 +36,9 @@ Ver [ROADMAP.md](./ROADMAP.md) para lo que sigue.
   vivo).
 - **Agenda**: vista de semana y de mes (con el dia actual resaltado), tocar
   un dia abre un dialogo para agregar un evento o tarea a esa fecha
-  eligiendo el horario; eventos, disponibilidad semanal, deteccion
+  eligiendo el horario; calendario externo del colegio (iCal/.ics, por
+  ejemplo un campus virtual) sincronizado de solo lectura con un color
+  distinto; eventos, disponibilidad semanal, deteccion
   determinística de conflictos (solapamientos, fuera de disponibilidad,
   sobrecarga diaria, examenes sin sesiones, descansos insuficientes).
 - **Planificador semanal con IA**: genera una propuesta de bloques de
