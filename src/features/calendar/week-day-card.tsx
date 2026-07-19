@@ -6,7 +6,7 @@ import { es } from "date-fns/locale";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DayQuickAddDialog } from "@/features/calendar/day-quick-add-dialog";
+import { DayQuickAddDialog, type DayQuickAddExistingItem } from "@/features/calendar/day-quick-add-dialog";
 import { formatDate, formatTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type { EventCategory } from "@/types/domain";
@@ -112,7 +112,25 @@ export function WeekDayCard({ dateStr, label, items, isToday }: WeekDayCardProps
       </Card>
 
       <DayQuickAddDialog
-        target={open ? { dateStr, dateLabel: dayLabel(dateStr) } : null}
+        target={
+          open
+            ? {
+                dateStr,
+                dateLabel: dayLabel(dateStr),
+                items: items.map(
+                  (item): DayQuickAddExistingItem => ({
+                    id: item.id,
+                    title: item.title,
+                    startsAt: item.startsAt,
+                    endsAt: item.endsAt,
+                    kind: item.kind,
+                    category: item.category,
+                    isFullDay: item.isFullDay,
+                  }),
+                ),
+              }
+            : null
+        }
         onOpenChange={setOpen}
       />
     </>

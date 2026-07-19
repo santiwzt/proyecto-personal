@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AvailabilityRules } from "@/features/calendar/availability-rules";
 import { CreateEventDialog } from "@/features/calendar/create-event-dialog";
-import { MonthView, type MonthDayCell } from "@/features/calendar/month-view";
+import { MonthView, type MonthDayCell, type MonthDayCellItem } from "@/features/calendar/month-view";
 import { WeekDayCard } from "@/features/calendar/week-day-card";
 import { PlannerPanel } from "@/features/planner/planner-panel";
 import { CreateTaskDialog } from "@/features/tasks/create-task-dialog";
@@ -117,15 +117,55 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
     (date) => {
       const dateStr = format(date, "yyyy-MM-dd");
       const { start: dayWeekStart } = getWeekBounds(date);
+      const items: MonthDayCellItem[] = [
+        ...allEvents
+          .filter((e) => e.startsAt.slice(0, 10) === dateStr)
+          .map((e) => ({
+            id: e.id,
+            title: e.title,
+            startsAt: e.startsAt,
+            endsAt: e.endsAt,
+            category: e.category as EventCategory | null,
+            kind: "event" as const,
+          })),
+        ...allExams
+          .filter((e) => e.scheduledAt.slice(0, 10) === dateStr)
+          .map((e) => ({
+            id: e.id,
+            title: `Examen: ${e.title}`,
+            startsAt: e.scheduledAt,
+            endsAt: e.scheduledAt,
+            category: "examen" as EventCategory | null,
+            kind: "exam" as const,
+          })),
+        ...allTasks
+          .filter((t) => t.dueAt?.slice(0, 10) === dateStr)
+          .map((t) => ({
+            id: t.id,
+            title: t.title,
+            startsAt: t.dueAt!,
+            endsAt: t.dueAt!,
+            category: null,
+            kind: "task" as const,
+          })),
+        ...schoolEvents
+          .filter((e) => e.startsAt.slice(0, 10) === dateStr)
+          .map((e) => ({
+            id: e.uid,
+            title: e.title,
+            startsAt: e.startsAt,
+            endsAt: e.endsAt,
+            category: null,
+            kind: "colegio" as const,
+            isFullDay: e.isFullDay,
+          })),
+      ].sort((a, b) => a.startsAt.localeCompare(b.startsAt));
       return {
         dateStr,
         dayNumber: date.getDate(),
         isCurrentMonth: isSameMonth(date, monthAnchor),
         isToday: dateStr === todayStr,
-        examCount: allExams.filter((e) => e.scheduledAt.slice(0, 10) === dateStr).length,
-        eventCount: allEvents.filter((e) => e.startsAt.slice(0, 10) === dateStr).length,
-        taskCount: allTasks.filter((t) => t.dueAt?.slice(0, 10) === dateStr).length,
-        schoolCount: schoolEvents.filter((e) => e.startsAt.slice(0, 10) === dateStr).length,
+        items,
         weekHref: `/agenda?view=week&week=${format(dayWeekStart, "yyyy-MM-dd")}`,
       };
     },

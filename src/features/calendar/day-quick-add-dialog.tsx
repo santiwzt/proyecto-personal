@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { formatTime } from "@/lib/dates";
 import { createTaskAction } from "@/server/actions/academic-actions";
 import { createEventAction } from "@/server/actions/calendar-actions";
 import type { EventCategory, TaskPriority } from "@/types/domain";
@@ -35,10 +36,21 @@ const CATEGORY_LABELS: Record<EventCategory, string> = {
 
 const PRIORITY_LABELS: Record<TaskPriority, string> = { baja: "Baja", media: "Media", alta: "Alta" };
 
+export interface DayQuickAddExistingItem {
+  id: string;
+  title: string;
+  startsAt: string;
+  endsAt: string;
+  kind: "event" | "exam" | "task" | "colegio";
+  category?: EventCategory | null;
+  isFullDay?: boolean;
+}
+
 export interface DayQuickAddTarget {
   dateStr: string;
   dateLabel: string;
   weekHref?: string;
+  items?: DayQuickAddExistingItem[];
 }
 
 interface DayQuickAddDialogProps {
@@ -150,6 +162,39 @@ export function DayQuickAddDialog({ target, onOpenChange }: DayQuickAddDialogPro
           <DialogTitle className="capitalize">{target?.dateLabel}</DialogTitle>
           <DialogDescription>Elegi que agregar y a que hora.</DialogDescription>
         </DialogHeader>
+
+        {target?.items && target.items.length > 0 ? (
+          <div className="space-y-1.5 rounded-md border border-border p-2">
+            <p className="text-xs font-medium text-muted-foreground">Ya tenes esto ese dia</p>
+            <ul className="space-y-1.5">
+              {target.items.map((item) => (
+                <li key={item.id} className="flex items-center justify-between gap-2 text-xs">
+                  <span className="truncate">{item.title}</span>
+                  <span className="flex shrink-0 items-center gap-1.5 text-muted-foreground">
+                    <span>{item.isFullDay ? "Todo el dia" : formatTime(item.startsAt)}</span>
+                    {item.kind === "colegio" ? (
+                      <span className="rounded-sm border border-violet-500/30 bg-violet-500/15 px-1 text-[10px] font-medium text-violet-700 dark:text-violet-300">
+                        Colegio
+                      </span>
+                    ) : item.kind === "exam" ? (
+                      <span className="rounded-sm bg-destructive/15 px-1 text-[10px] font-medium text-destructive">
+                        Examen
+                      </span>
+                    ) : item.kind === "task" ? (
+                      <span className="rounded-sm bg-muted px-1 text-[10px] font-medium text-muted-foreground">
+                        Tarea
+                      </span>
+                    ) : (
+                      <span className="rounded-sm bg-secondary px-1 text-[10px] font-medium text-secondary-foreground">
+                        {item.category ? CATEGORY_LABELS[item.category] : "Evento"}
+                      </span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         <div className="flex gap-2">
           <Button
