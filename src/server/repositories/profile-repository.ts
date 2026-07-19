@@ -61,6 +61,7 @@ function mapPreferences(row: UserPreferencesTable["Row"]): Omit<UserPreferences,
     theme: row.theme,
     dailyStudyLimitMinutes: row.daily_study_limit_minutes,
     aiConsentGiven: row.ai_consent_given,
+    monthlyBudgetArs: row.monthly_budget_ars,
   };
 }
 
@@ -103,6 +104,7 @@ export const preferencesRepository = {
     if (patch.theme !== undefined) dbPatch.theme = patch.theme;
     if (patch.dailyStudyLimitMinutes !== undefined) dbPatch.daily_study_limit_minutes = patch.dailyStudyLimitMinutes;
     if (patch.aiConsentGiven !== undefined) dbPatch.ai_consent_given = patch.aiConsentGiven;
+    if (patch.monthlyBudgetArs !== undefined) dbPatch.monthly_budget_ars = patch.monthlyBudgetArs;
     const { error } = await supabase.from("user_preferences").update(dbPatch).eq("user_id", userId);
     if (error) dbError("preferences.update", error);
     return this.get(userId);

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireSessionUser } from "@/lib/auth/session";
+import { AppError } from "@/lib/errors/app-error";
 import {
   createExpenseSchema,
   updateProfileSchema,
@@ -21,11 +22,19 @@ export async function createExpenseAction(input: CreateExpenseInput): Promise<Ex
 }
 
 export async function updatePreferencesAction(
-  patch: Partial<Pick<UserPreferences, "theme" | "dailyStudyLimitMinutes" | "aiConsentGiven">>,
+  patch: Partial<Pick<UserPreferences, "theme" | "dailyStudyLimitMinutes" | "aiConsentGiven" | "monthlyBudgetArs">>,
 ): Promise<UserPreferences> {
   const user = await requireSessionUser();
+  if (
+    patch.monthlyBudgetArs !== undefined &&
+    patch.monthlyBudgetArs !== null &&
+    (!Number.isFinite(patch.monthlyBudgetArs) || patch.monthlyBudgetArs < 0)
+  ) {
+    throw new AppError("VALIDATION", "El presupuesto debe ser un numero positivo.");
+  }
   const updated = await preferencesRepository.update(user.userId, patch);
   revalidatePath("/configuracion");
+  revalidatePath("/gastos");
   return updated;
 }
 

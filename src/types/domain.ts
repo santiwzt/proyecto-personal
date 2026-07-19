@@ -25,6 +25,8 @@ export interface UserPreferences {
   dailyStudyLimitMinutes: number;
   preferredStudyWindows: AvailabilityRule[];
   aiConsentGiven: boolean;
+  /** Monthly spending budget in ARS, the app's default currency. Null means no budget set. */
+  monthlyBudgetArs: number | null;
 }
 
 export type SubjectColor =

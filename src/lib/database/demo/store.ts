@@ -120,6 +120,7 @@ export class DemoStore {
       dailyStudyLimitMinutes: 240,
       preferredStudyWindows: [],
       aiConsentGiven: false,
+      monthlyBudgetArs: null,
     });
   }
 
@@ -161,6 +162,7 @@ export class DemoStore {
           dailyStudyLimitMinutes: 240,
           preferredStudyWindows: [],
           aiConsentGiven: false,
+          monthlyBudgetArs: null,
           ...patch,
         };
     this.preferences.set(userId, updated);

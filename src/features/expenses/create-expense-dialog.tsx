@@ -20,7 +20,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { todayISODate } from "@/lib/dates";
 import { createExpenseAction } from "@/server/actions/misc-actions";
 
-export function CreateExpenseDialog() {
+const DEFAULT_CATEGORIES = ["Comida", "Transporte", "Salidas", "Estudio", "Salud", "Ropa", "Otro"];
+
+export function CreateExpenseDialog({ existingCategories = [] }: { existingCategories?: string[] }) {
+  const categoryOptions = Array.from(new Set([...DEFAULT_CATEGORIES, ...existingCategories])).sort((a, b) =>
+    a.localeCompare(b),
+  );
   const router = useRouter();
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
@@ -115,12 +120,18 @@ export function CreateExpenseDialog() {
             <Label htmlFor="expense-category">Categoria</Label>
             <Input
               id="expense-category"
+              list="expense-category-options"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               placeholder="Comida, transporte, salidas..."
               required
               maxLength={80}
             />
+            <datalist id="expense-category-options">
+              {categoryOptions.map((option) => (
+                <option key={option} value={option} />
+              ))}
+            </datalist>
           </div>
 
           <div className="space-y-1.5">
