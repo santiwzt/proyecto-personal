@@ -52,6 +52,7 @@ export function WeekDayCard({ dateStr, label, items, isToday }: WeekDayCardProps
       <Card
         role="button"
         tabIndex={0}
+        aria-label={`Agregar algo el ${dayLabel(dateStr)}`}
         onClick={() => setOpen(true)}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {

@@ -71,6 +71,7 @@ export function MonthView({ monthLabel, prevMonthHref, nextMonthHref, days }: Mo
               key={day.dateStr}
               type="button"
               onClick={() => setSelected(day)}
+              aria-label={`Agregar algo el ${dayLabel(day.dateStr)}`}
               className={cn(
                 "flex min-h-20 flex-col gap-1 bg-background p-1.5 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset sm:min-h-24 sm:p-2",
                 !day.isCurrentMonth && "bg-muted/40 text-muted-foreground",
