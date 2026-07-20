@@ -9,9 +9,27 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DayQuickAddDialog, type DayQuickAddExistingItem } from "@/features/calendar/day-quick-add-dialog";
+import {
+  CATEGORY_BADGE_CLASSES,
+  CATEGORY_LABELS,
+  COLEGIO_BADGE_CLASSES,
+  TASK_BADGE_CLASSES,
+} from "@/features/calendar/event-visuals";
 import { formatTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type { EventCategory } from "@/types/domain";
+
+function itemChipClasses(item: MonthDayCellItem): string {
+  if (item.kind === "colegio") return COLEGIO_BADGE_CLASSES;
+  if (item.kind === "task") return TASK_BADGE_CLASSES;
+  return CATEGORY_BADGE_CLASSES[item.category ?? "otro"];
+}
+
+function itemKindLabel(item: MonthDayCellItem): string {
+  if (item.kind === "colegio") return "Colegio";
+  if (item.kind === "task") return "Tarea";
+  return CATEGORY_LABELS[item.category ?? "otro"];
+}
 
 /** Builds a label like "lunes 20 de julio" from a "yyyy-MM-dd" string using local date parts, avoiding UTC-parsing day shifts. */
 function dayLabel(dateStr: string): string {
@@ -20,13 +38,6 @@ function dayLabel(dateStr: string): string {
 }
 
 const WEEKDAY_HEADERS = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
-
-const KIND_LABELS = {
-  exam: "Examen",
-  event: "Evento",
-  task: "Tarea",
-  colegio: "Colegio",
-} as const;
 
 export interface MonthDayCellItem {
   id: string;
@@ -59,16 +70,7 @@ function ItemChip({ item }: { item: MonthDayCellItem }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span
-          className={cn(
-            "truncate rounded-sm px-1 text-[10px] font-medium",
-            item.kind === "exam" && "bg-destructive/15 text-destructive",
-            item.kind === "event" && "bg-secondary text-secondary-foreground",
-            item.kind === "task" && "bg-muted text-muted-foreground",
-            item.kind === "colegio" &&
-              "border border-violet-500/30 bg-violet-500/15 text-violet-700 dark:text-violet-300",
-          )}
-        >
+        <span className={cn("truncate rounded-sm px-1 text-[10px] font-medium", itemChipClasses(item))}>
           {item.title}
         </span>
       </TooltipTrigger>
@@ -76,7 +78,7 @@ function ItemChip({ item }: { item: MonthDayCellItem }) {
         <p className="font-medium">{item.title}</p>
         <p className="text-muted-foreground">
           {item.isFullDay ? "Todo el dia" : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`} ·{" "}
-          {KIND_LABELS[item.kind]}
+          {itemKindLabel(item)}
         </p>
         {item.description ? <p className="mt-1 whitespace-pre-line text-muted-foreground">{item.description}</p> : null}
       </TooltipContent>

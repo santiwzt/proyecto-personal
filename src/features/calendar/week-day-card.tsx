@@ -8,20 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DayQuickAddDialog, type DayQuickAddExistingItem } from "@/features/calendar/day-quick-add-dialog";
+import { CATEGORY_BADGE_CLASSES, CATEGORY_LABELS, COLEGIO_BADGE_CLASSES } from "@/features/calendar/event-visuals";
 import { formatDate, formatTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type { EventCategory } from "@/types/domain";
-
-const CATEGORY_LABELS: Record<EventCategory, string> = {
-  clase: "Clase",
-  examen: "Examen",
-  entrenamiento: "Entrenamiento",
-  partido: "Partido",
-  estudio: "Estudio",
-  proyecto: "Proyecto",
-  personal: "Personal",
-  otro: "Otro",
-};
 
 export interface WeekDayCardItem {
   id: string;
@@ -98,15 +88,15 @@ export function WeekDayCard({ dateStr, label, items, isToday }: WeekDayCardProps
                           : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`}
                     </p>
                     {item.kind === "colegio" ? (
-                      <Badge
-                        variant="outline"
-                        className="mt-1 border-violet-500/30 bg-violet-500/15 text-violet-700 dark:text-violet-300"
-                      >
+                      <Badge variant="outline" className={cn("mt-1", COLEGIO_BADGE_CLASSES)}>
                         Colegio
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="mt-1">
-                        {CATEGORY_LABELS[item.category!]}
+                      <Badge
+                        variant="outline"
+                        className={cn("mt-1 border-transparent", CATEGORY_BADGE_CLASSES[item.category ?? "otro"])}
+                      >
+                        {CATEGORY_LABELS[item.category ?? "otro"]}
                       </Badge>
                     )}
                   </div>

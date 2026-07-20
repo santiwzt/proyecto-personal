@@ -18,21 +18,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { CATEGORY_BADGE_CLASSES, CATEGORY_LABELS, COLEGIO_BADGE_CLASSES, TASK_BADGE_CLASSES } from "@/features/calendar/event-visuals";
 import { formatTime } from "@/lib/dates";
+import { cn } from "@/lib/utils";
 import { createTaskAction } from "@/server/actions/academic-actions";
 import { createEventAction } from "@/server/actions/calendar-actions";
 import type { EventCategory, TaskPriority } from "@/types/domain";
-
-const CATEGORY_LABELS: Record<EventCategory, string> = {
-  clase: "Clase",
-  examen: "Examen",
-  entrenamiento: "Entrenamiento",
-  partido: "Partido",
-  estudio: "Estudio",
-  proyecto: "Proyecto",
-  personal: "Personal",
-  otro: "Otro",
-};
 
 const PRIORITY_LABELS: Record<TaskPriority, string> = { baja: "Baja", media: "Media", alta: "Alta" };
 
@@ -173,19 +164,18 @@ export function DayQuickAddDialog({ target, onOpenChange }: DayQuickAddDialogPro
                   <span className="flex shrink-0 items-center gap-1.5 text-muted-foreground">
                     <span>{item.isFullDay ? "Todo el dia" : formatTime(item.startsAt)}</span>
                     {item.kind === "colegio" ? (
-                      <span className="rounded-sm border border-violet-500/30 bg-violet-500/15 px-1 text-[10px] font-medium text-violet-700 dark:text-violet-300">
+                      <span className={cn("rounded-sm px-1 text-[10px] font-medium", COLEGIO_BADGE_CLASSES)}>
                         Colegio
                       </span>
-                    ) : item.kind === "exam" ? (
-                      <span className="rounded-sm bg-destructive/15 px-1 text-[10px] font-medium text-destructive">
-                        Examen
-                      </span>
                     ) : item.kind === "task" ? (
-                      <span className="rounded-sm bg-muted px-1 text-[10px] font-medium text-muted-foreground">
-                        Tarea
-                      </span>
+                      <span className={cn("rounded-sm px-1 text-[10px] font-medium", TASK_BADGE_CLASSES)}>Tarea</span>
                     ) : (
-                      <span className="rounded-sm bg-secondary px-1 text-[10px] font-medium text-secondary-foreground">
+                      <span
+                        className={cn(
+                          "rounded-sm px-1 text-[10px] font-medium",
+                          CATEGORY_BADGE_CLASSES[item.category ?? "otro"],
+                        )}
+                      >
                         {item.category ? CATEGORY_LABELS[item.category] : "Evento"}
                       </span>
                     )}

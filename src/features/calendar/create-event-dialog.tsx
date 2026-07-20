@@ -19,19 +19,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { CATEGORY_LABELS } from "@/features/calendar/event-visuals";
 import { createEventAction } from "@/server/actions/calendar-actions";
 import type { EventCategory } from "@/types/domain";
-
-const CATEGORY_LABELS: Record<EventCategory, string> = {
-  clase: "Clase",
-  examen: "Examen",
-  entrenamiento: "Entrenamiento",
-  partido: "Partido",
-  estudio: "Estudio",
-  proyecto: "Proyecto",
-  personal: "Personal",
-  otro: "Otro",
-};
 
 /** "2026-07-20T18:00" (datetime-local) -> "2026-07-20T18:00:00-03:00" (ISO with offset). */
 function toIsoWithOffset(datetimeLocal: string): string {
