@@ -14,7 +14,7 @@ export const CATEGORY_LABELS: Record<EventCategory, string> = {
 /** Background+text classes for a category chip/badge, legible in both themes. */
 export const CATEGORY_BADGE_CLASSES: Record<EventCategory, string> = {
   clase: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
-  examen: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  examen: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
   entrenamiento: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
   partido: "bg-green-500/15 text-green-700 dark:text-green-300",
   estudio: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300",
