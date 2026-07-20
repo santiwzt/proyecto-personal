@@ -18,7 +18,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { CATEGORY_BADGE_CLASSES, CATEGORY_LABELS, COLEGIO_BADGE_CLASSES, TASK_BADGE_CLASSES } from "@/features/calendar/event-visuals";
+import {
+  CATEGORY_BADGE_CLASSES,
+  CATEGORY_LABELS,
+  inferSchoolEventVisual,
+  TASK_BADGE_CLASSES,
+} from "@/features/calendar/event-visuals";
 import { formatTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { createTaskAction } from "@/server/actions/academic-actions";
@@ -164,8 +169,13 @@ export function DayQuickAddDialog({ target, onOpenChange }: DayQuickAddDialogPro
                   <span className="flex shrink-0 items-center gap-1.5 text-muted-foreground">
                     <span>{item.isFullDay ? "Todo el dia" : formatTime(item.startsAt)}</span>
                     {item.kind === "colegio" ? (
-                      <span className={cn("rounded-sm px-1 text-[10px] font-medium", COLEGIO_BADGE_CLASSES)}>
-                        Colegio
+                      <span
+                        className={cn(
+                          "rounded-sm px-1 text-[10px] font-medium",
+                          inferSchoolEventVisual(item.title).classes,
+                        )}
+                      >
+                        {inferSchoolEventVisual(item.title).label}
                       </span>
                     ) : item.kind === "task" ? (
                       <span className={cn("rounded-sm px-1 text-[10px] font-medium", TASK_BADGE_CLASSES)}>Tarea</span>
