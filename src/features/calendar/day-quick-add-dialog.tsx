@@ -21,7 +21,7 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   CATEGORY_BADGE_CLASSES,
   CATEGORY_LABELS,
-  inferSchoolEventVisual,
+  inferSchoolEventCategory,
   TASK_BADGE_CLASSES,
 } from "@/features/calendar/event-visuals";
 import { formatTime } from "@/lib/dates";
@@ -163,35 +163,33 @@ export function DayQuickAddDialog({ target, onOpenChange }: DayQuickAddDialogPro
           <div className="space-y-1.5 rounded-md border border-border p-2">
             <p className="text-xs font-medium text-muted-foreground">Ya tenes esto ese dia</p>
             <ul className="space-y-1.5">
-              {target.items.map((item) => (
-                <li key={item.id} className="flex items-center justify-between gap-2 text-xs">
-                  <span className="truncate">{item.title}</span>
-                  <span className="flex shrink-0 items-center gap-1.5 text-muted-foreground">
-                    <span>{item.isFullDay ? "Todo el dia" : formatTime(item.startsAt)}</span>
-                    {item.kind === "colegio" ? (
-                      <span
-                        className={cn(
-                          "rounded-sm px-1 text-[10px] font-medium",
-                          inferSchoolEventVisual(item.title).classes,
-                        )}
-                      >
-                        {inferSchoolEventVisual(item.title).label}
+              {target.items.map((item) => {
+                if (item.kind === "task") {
+                  return (
+                    <li key={item.id} className="flex items-center justify-between gap-2 text-xs">
+                      <span className="truncate">{item.title}</span>
+                      <span className="flex shrink-0 items-center gap-1.5 text-muted-foreground">
+                        <span>{item.isFullDay ? "Todo el dia" : formatTime(item.startsAt)}</span>
+                        <span className={cn("rounded-sm px-1 text-[10px] font-medium", TASK_BADGE_CLASSES)}>
+                          Tarea
+                        </span>
                       </span>
-                    ) : item.kind === "task" ? (
-                      <span className={cn("rounded-sm px-1 text-[10px] font-medium", TASK_BADGE_CLASSES)}>Tarea</span>
-                    ) : (
-                      <span
-                        className={cn(
-                          "rounded-sm px-1 text-[10px] font-medium",
-                          CATEGORY_BADGE_CLASSES[item.category ?? "otro"],
-                        )}
-                      >
-                        {item.category ? CATEGORY_LABELS[item.category] : "Evento"}
+                    </li>
+                  );
+                }
+                const category = item.kind === "colegio" ? inferSchoolEventCategory(item.title) : (item.category ?? "otro");
+                return (
+                  <li key={item.id} className="flex items-center justify-between gap-2 text-xs">
+                    <span className="truncate">{item.title}</span>
+                    <span className="flex shrink-0 items-center gap-1.5 text-muted-foreground">
+                      <span>{item.isFullDay ? "Todo el dia" : formatTime(item.startsAt)}</span>
+                      <span className={cn("rounded-sm px-1 text-[10px] font-medium", CATEGORY_BADGE_CLASSES[category])}>
+                        {CATEGORY_LABELS[category]}
                       </span>
-                    )}
-                  </span>
-                </li>
-              ))}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ) : null}

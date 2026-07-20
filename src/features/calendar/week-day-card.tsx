@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DayQuickAddDialog, type DayQuickAddExistingItem } from "@/features/calendar/day-quick-add-dialog";
-import { CATEGORY_BADGE_CLASSES, CATEGORY_LABELS, inferSchoolEventVisual } from "@/features/calendar/event-visuals";
+import { CATEGORY_BADGE_CLASSES, CATEGORY_LABELS, inferSchoolEventCategory } from "@/features/calendar/event-visuals";
 import { formatDate, formatTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type { EventCategory } from "@/types/domain";
@@ -77,6 +77,7 @@ export function WeekDayCard({ dateStr, label, items, isToday }: WeekDayCardProps
           ) : (
             <TooltipProvider delayDuration={250}>
               {items.map((item) => {
+                const category = item.kind === "colegio" ? inferSchoolEventCategory(item.title) : (item.category ?? "otro");
                 const body = (
                   <div className="rounded-md border border-border p-2 text-xs">
                     <p className="font-medium">{item.title}</p>
@@ -87,21 +88,9 @@ export function WeekDayCard({ dateStr, label, items, isToday }: WeekDayCardProps
                           ? formatTime(item.startsAt)
                           : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`}
                     </p>
-                    {item.kind === "colegio" ? (
-                      <Badge
-                        variant="outline"
-                        className={cn("mt-1 border-transparent", inferSchoolEventVisual(item.title).classes)}
-                      >
-                        {inferSchoolEventVisual(item.title).label}
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className={cn("mt-1 border-transparent", CATEGORY_BADGE_CLASSES[item.category ?? "otro"])}
-                      >
-                        {CATEGORY_LABELS[item.category ?? "otro"]}
-                      </Badge>
-                    )}
+                    <Badge variant="outline" className={cn("mt-1 border-transparent", CATEGORY_BADGE_CLASSES[category])}>
+                      {CATEGORY_LABELS[category]}
+                    </Badge>
                   </div>
                 );
                 if (!item.description) return <React.Fragment key={item.id}>{body}</React.Fragment>;

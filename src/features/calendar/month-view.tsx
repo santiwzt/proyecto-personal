@@ -12,23 +12,26 @@ import { DayQuickAddDialog, type DayQuickAddExistingItem } from "@/features/cale
 import {
   CATEGORY_BADGE_CLASSES,
   CATEGORY_LABELS,
-  inferSchoolEventVisual,
+  inferSchoolEventCategory,
   TASK_BADGE_CLASSES,
 } from "@/features/calendar/event-visuals";
 import { formatTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type { EventCategory } from "@/types/domain";
 
+function itemCategory(item: MonthDayCellItem): EventCategory {
+  if (item.kind === "colegio") return inferSchoolEventCategory(item.title);
+  return item.category ?? "otro";
+}
+
 function itemChipClasses(item: MonthDayCellItem): string {
-  if (item.kind === "colegio") return inferSchoolEventVisual(item.title).classes;
   if (item.kind === "task") return TASK_BADGE_CLASSES;
-  return CATEGORY_BADGE_CLASSES[item.category ?? "otro"];
+  return CATEGORY_BADGE_CLASSES[itemCategory(item)];
 }
 
 function itemKindLabel(item: MonthDayCellItem): string {
-  if (item.kind === "colegio") return inferSchoolEventVisual(item.title).label;
   if (item.kind === "task") return "Tarea";
-  return CATEGORY_LABELS[item.category ?? "otro"];
+  return CATEGORY_LABELS[itemCategory(item)];
 }
 
 /** Builds a label like "lunes 20 de julio" from a "yyyy-MM-dd" string using local date parts, avoiding UTC-parsing day shifts. */
