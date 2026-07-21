@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarPlus, ListPlus, Loader2 } from "lucide-react";
+import { CalendarPlus, GraduationCap, ListPlus, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -183,7 +183,15 @@ export function DayQuickAddDialog({ target, onOpenChange }: DayQuickAddDialogPro
                     <span className="truncate">{item.title}</span>
                     <span className="flex shrink-0 items-center gap-1.5 text-muted-foreground">
                       <span>{item.isFullDay ? "Todo el dia" : formatTime(item.startsAt)}</span>
-                      <span className={cn("rounded-sm px-1 text-[10px] font-medium", CATEGORY_BADGE_CLASSES[category])}>
+                      <span
+                        className={cn(
+                          "flex items-center gap-0.5 rounded-sm px-1 text-[10px] font-medium",
+                          CATEGORY_BADGE_CLASSES[category],
+                        )}
+                      >
+                        {item.kind === "colegio" ? (
+                          <GraduationCap className="size-2.5 shrink-0" aria-hidden="true" />
+                        ) : null}
                         {CATEGORY_LABELS[category]}
                       </span>
                     </span>

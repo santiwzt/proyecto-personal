@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, GraduationCap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -73,8 +73,16 @@ function ItemChip({ item }: { item: MonthDayCellItem }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className={cn("truncate rounded-sm px-1 text-[10px] font-medium", itemChipClasses(item))}>
-          {item.title}
+        <span
+          className={cn(
+            "flex items-center gap-0.5 truncate rounded-sm px-1 text-[10px] font-medium",
+            itemChipClasses(item),
+          )}
+        >
+          {item.kind === "colegio" ? (
+            <GraduationCap className="size-2.5 shrink-0" aria-hidden="true" />
+          ) : null}
+          <span className="truncate">{item.title}</span>
         </span>
       </TooltipTrigger>
       <TooltipContent className="max-w-64 text-left">
@@ -82,6 +90,7 @@ function ItemChip({ item }: { item: MonthDayCellItem }) {
         <p className="text-muted-foreground">
           {item.isFullDay ? "Todo el dia" : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`} ·{" "}
           {itemKindLabel(item)}
+          {item.kind === "colegio" ? " · Colegio" : ""}
         </p>
         {item.description ? <p className="mt-1 whitespace-pre-line text-muted-foreground">{item.description}</p> : null}
       </TooltipContent>

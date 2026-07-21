@@ -3,6 +3,7 @@
 import * as React from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { GraduationCap } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,7 +89,11 @@ export function WeekDayCard({ dateStr, label, items, isToday }: WeekDayCardProps
                           ? formatTime(item.startsAt)
                           : `${formatTime(item.startsAt)}–${formatTime(item.endsAt)}`}
                     </p>
-                    <Badge variant="outline" className={cn("mt-1 border-transparent", CATEGORY_BADGE_CLASSES[category])}>
+                    <Badge
+                      variant="outline"
+                      className={cn("mt-1 gap-0.5 border-transparent", CATEGORY_BADGE_CLASSES[category])}
+                    >
+                      {item.kind === "colegio" ? <GraduationCap className="size-3" aria-hidden="true" /> : null}
                       {CATEGORY_LABELS[category]}
                     </Badge>
                   </div>

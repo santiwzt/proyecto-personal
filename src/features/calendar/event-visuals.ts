@@ -19,7 +19,7 @@ export const CATEGORY_BADGE_CLASSES: Record<EventCategory, string> = {
   partido: "bg-green-500/15 text-green-700 dark:text-green-300",
   estudio: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300",
   proyecto: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
-  personal: "bg-pink-500/15 text-pink-700 dark:text-pink-300",
+  personal: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
   otro: "bg-secondary text-secondary-foreground",
 };
 
