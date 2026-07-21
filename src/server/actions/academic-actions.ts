@@ -40,10 +40,18 @@ export async function updateSubjectAction(id: string, input: Partial<CreateSubje
   return subject;
 }
 
-export async function archiveSubjectAction(id: string): Promise<void> {
+export type ArchiveSubjectResult = { ok: true } | { ok: false; message: string };
+
+export async function archiveSubjectAction(id: string): Promise<ArchiveSubjectResult> {
   const user = await requireSessionUser();
-  await subjectsRepository.archive(user.userId, id);
+  try {
+    await subjectsRepository.archive(user.userId, id);
+  } catch (error) {
+    console.error("archiveSubjectAction failed", error);
+    return { ok: false, message: "No se pudo archivar la materia. Intenta nuevamente en unos minutos." };
+  }
   revalidatePath("/estudios");
+  return { ok: true };
 }
 
 export async function createTopicAction(input: CreateTopicInput): Promise<StudyTopic> {

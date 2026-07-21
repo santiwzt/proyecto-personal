@@ -112,7 +112,19 @@ export const subjectsRepository = {
   },
 
   async archive(userId: string, id: string): Promise<Subject> {
-    return this.update(userId, id, { archivedAt: new Date().toISOString() } as never);
+    if (isDemoMode) {
+      return getDemoStore().subjects.update(userId, id, { archivedAt: new Date().toISOString() });
+    }
+    const supabase = await mustSupabase();
+    const { data, error } = await supabase
+      .from("subjects")
+      .update({ archived_at: new Date().toISOString() })
+      .eq("user_id", userId)
+      .eq("id", id)
+      .select("*")
+      .single();
+    if (error) dbError("subjects.archive", error);
+    return mapSubject(data);
   },
 };
 

@@ -25,19 +25,15 @@ export function ArchiveSubjectDialog({ subjectId, subjectName }: { subjectId: st
 
   function handleArchive() {
     startTransition(async () => {
-      try {
-        await archiveSubjectAction(subjectId);
-        toast({ title: `"${subjectName}" archivada.` });
-        setOpen(false);
-        router.push("/estudios");
-        router.refresh();
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "No se pudo archivar la materia",
-          description: error instanceof Error ? error.message : undefined,
-        });
+      const result = await archiveSubjectAction(subjectId);
+      if (!result.ok) {
+        toast({ variant: "destructive", title: "No se pudo archivar la materia", description: result.message });
+        return;
       }
+      toast({ title: `"${subjectName}" archivada.` });
+      setOpen(false);
+      router.push("/estudios");
+      router.refresh();
     });
   }
 
