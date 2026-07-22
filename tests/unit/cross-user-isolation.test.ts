@@ -53,8 +53,14 @@ describe("cross-user data isolation", () => {
     ).rejects.toThrow(AppError);
   });
 
-  it("user B cannot archive (delete) user A's subject", async () => {
+  it("user B cannot archive user A's subject", async () => {
     await expect(subjectsRepository.archive(SECONDARY_DEMO_USER_ID, userASubjectId)).rejects.toThrow(AppError);
+  });
+
+  it("user B cannot permanently delete user A's subject", async () => {
+    await expect(subjectsRepository.remove(SECONDARY_DEMO_USER_ID, userASubjectId)).rejects.toThrow(AppError);
+    // still there afterwards, proving the delete never went through
+    await expect(subjectsRepository.get(DEMO_USER_ID, userASubjectId)).resolves.toBeDefined();
   });
 
   it("user B cannot complete user A's task", async () => {

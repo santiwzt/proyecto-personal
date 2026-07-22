@@ -17,6 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileRow } from "@/features/files/file-row";
 import { ArchiveSubjectDialog } from "@/features/subjects/archive-subject-dialog";
+import { DeleteSubjectDialog } from "@/features/subjects/delete-subject-dialog";
 import { subjectColorClasses } from "@/features/subjects/subject-color";
 import { CreateTopicDialog } from "@/features/study/create-topic-dialog";
 import { TopicRow } from "@/features/study/topic-row";
@@ -52,7 +53,12 @@ export default async function SubjectDetailPage({ params }: { params: Promise<{ 
       <PageHeader
         title={subject.name}
         description={[subject.teacher, subject.course].filter(Boolean).join(" · ") || subject.description || undefined}
-        actions={<ArchiveSubjectDialog subjectId={subject.id} subjectName={subject.name} />}
+        actions={
+          <>
+            <ArchiveSubjectDialog subjectId={subject.id} subjectName={subject.name} />
+            <DeleteSubjectDialog subjectId={subject.id} subjectName={subject.name} />
+          </>
+        }
       />
 
       <div className="mb-4 flex items-center gap-2">

@@ -126,6 +126,76 @@ export const subjectsRepository = {
     if (error) dbError("subjects.archive", error);
     return mapSubject(data);
   },
+
+  /**
+   * Permanently deletes a subject. Mirrors the DB's foreign-key behavior
+   * (see supabase/migrations/0003_core_tables.sql): topics and exams belong
+   * to exactly one subject and are deleted with it, while tasks, files,
+   * practice sets, study sessions and conversations only lose the
+   * reference (subjectId/topicId/examId set to null) so that data survives.
+   */
+  async remove(userId: string, id: string): Promise<void> {
+    if (isDemoMode) {
+      const store = getDemoStore();
+      const removedTopicIds = store.studyTopics.list(userId).filter((t) => t.subjectId === id).map((t) => t.id);
+      const removedExamIds = store.exams.list(userId).filter((e) => e.subjectId === id).map((e) => e.id);
+
+      for (const topicId of removedTopicIds) store.studyTopics.remove(userId, topicId);
+      for (const examId of removedExamIds) store.exams.remove(userId, examId);
+
+      for (const task of store.tasks.list(userId).filter((t) => t.subjectId === id)) {
+        store.tasks.update(userId, task.id, { subjectId: null });
+      }
+      for (const file of store.files.list(userId).filter((f) => f.subjectId === id)) {
+        store.files.update(userId, file.id, { subjectId: null });
+      }
+      for (const set of store.practiceSets.list(userId)) {
+        if (set.subjectId === id || (set.topicId && removedTopicIds.includes(set.topicId))) {
+          store.practiceSets.update(userId, set.id, {
+            subjectId: set.subjectId === id ? null : set.subjectId,
+            topicId: set.topicId && removedTopicIds.includes(set.topicId) ? null : set.topicId,
+          });
+        }
+      }
+      for (const session of store.studySessions.list(userId)) {
+        const clearSubject = session.subjectId === id;
+        const clearTopic = !!session.topicId && removedTopicIds.includes(session.topicId);
+        const clearExam = !!session.examId && removedExamIds.includes(session.examId);
+        if (clearSubject || clearTopic || clearExam) {
+          store.studySessions.update(userId, session.id, {
+            subjectId: clearSubject ? null : session.subjectId,
+            topicId: clearTopic ? null : session.topicId,
+            examId: clearExam ? null : session.examId,
+          });
+        }
+      }
+      for (const conversation of store.conversations.list(userId)) {
+        if (conversation.scope.type === "subject" && conversation.scope.subjectId === id) {
+          store.conversations.update(userId, conversation.id, { scope: { type: "general" } });
+        }
+      }
+
+      store.subjects.remove(userId, id);
+      return;
+    }
+
+    const supabase = await mustSupabase();
+    // Neutralize scope-typed conversations before the DELETE fires -- the
+    // scope_subject_id FK is "on delete set null", but conversations also has
+    // a conversations_scope_shape CHECK requiring scope_subject_id to be set
+    // whenever scope_type='subject'. Left to the FK trigger alone, that
+    // combination would violate the check and abort the whole delete.
+    const { error: scopeError } = await supabase
+      .from("conversations")
+      .update({ scope_type: "general", scope_subject_id: null })
+      .eq("user_id", userId)
+      .eq("scope_type", "subject")
+      .eq("scope_subject_id", id);
+    if (scopeError) dbError("subjects.remove.clearConversationScope", scopeError);
+
+    const { error } = await supabase.from("subjects").delete().eq("user_id", userId).eq("id", id);
+    if (error) dbError("subjects.remove", error);
+  },
 };
 
 // ---------------------------------------------------------------------------

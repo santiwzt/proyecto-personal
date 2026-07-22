@@ -54,6 +54,26 @@ export async function archiveSubjectAction(id: string): Promise<ArchiveSubjectRe
   return { ok: true };
 }
 
+export type DeleteSubjectResult = { ok: true } | { ok: false; message: string };
+
+/**
+ * Permanently deletes a subject and its topics/exams; tasks, files, practice
+ * sets, study sessions and conversations only lose the reference (see
+ * subjectsRepository.remove). Irreversible -- the caller is expected to
+ * confirm with the user before calling this.
+ */
+export async function deleteSubjectAction(id: string): Promise<DeleteSubjectResult> {
+  const user = await requireSessionUser();
+  try {
+    await subjectsRepository.remove(user.userId, id);
+  } catch (error) {
+    console.error("deleteSubjectAction failed", error);
+    return { ok: false, message: "No se pudo eliminar la materia. Intenta nuevamente en unos minutos." };
+  }
+  revalidatePath("/estudios");
+  return { ok: true };
+}
+
 export async function createTopicAction(input: CreateTopicInput): Promise<StudyTopic> {
   const user = await requireSessionUser();
   const parsed = createTopicSchema.parse(input);
