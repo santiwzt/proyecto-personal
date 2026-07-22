@@ -161,6 +161,7 @@ describe("generatePlan", () => {
       studySessions: [],
       projects: [],
       subjectNameById,
+      now: new Date("2026-07-13T00:00:00-03:00"),
     });
 
     expect(plan.blocks.length).toBeGreaterThan(0);

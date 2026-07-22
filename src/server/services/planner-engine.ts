@@ -227,6 +227,7 @@ export interface PlannerEngineInput {
   projects: Project[];
   subjectNameById: Map<string, string>;
   maxDailyStudyMinutes?: number;
+  now?: Date;
 }
 
 export function generatePlan(input: PlannerEngineInput): GeneratedPlan {
@@ -318,6 +319,7 @@ export function generatePlan(input: PlannerEngineInput): GeneratedPlan {
     exams: input.exams,
     studySessions: input.studySessions,
     maxDailyStudyMinutes: maxDaily,
+    now: input.now,
   });
 
   const proposalConflicts: PlannerConflict[] = [
