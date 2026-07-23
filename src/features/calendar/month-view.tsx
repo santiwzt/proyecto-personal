@@ -78,11 +78,14 @@ function ItemChip({ item }: { item: MonthDayCellItem }) {
             "flex items-center gap-0.5 truncate rounded-sm px-1 text-[10px] font-medium",
             itemChipClasses(item),
           )}
+          aria-label={`${item.title} — ${itemKindLabel(item)}`}
         >
           {item.kind === "colegio" ? (
             <GraduationCap className="size-2.5 shrink-0" aria-hidden="true" />
           ) : null}
-          <span className="truncate">{item.title}</span>
+          <span className="truncate" aria-hidden="true">
+            {item.title}
+          </span>
         </span>
       </TooltipTrigger>
       <TooltipContent className="max-w-64 text-left">
