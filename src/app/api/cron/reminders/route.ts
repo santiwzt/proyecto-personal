@@ -1,6 +1,7 @@
 import webPush from "web-push";
 import { env, isPushConfigured } from "@/config/env";
 import { createSupabaseAdminClient } from "@/lib/database/supabase/admin";
+import { todayISODate } from "@/lib/dates";
 import { pushSubscriptionsRepository } from "@/server/repositories/push-repository";
 import { buildDailyReminder } from "@/server/services/reminders";
 import type { ExamStatus, TaskStatus } from "@/types/domain";
@@ -29,10 +30,14 @@ async function sendDailyReminders(): Promise<{ sent: number; users: number }> {
   const now = new Date();
   let sent = 0;
 
+  const todayStr = todayISODate(now);
+
   for (const userId of userIds) {
-    const [{ data: taskRows }, { data: examRows }] = await Promise.all([
+    const [{ data: taskRows }, { data: examRows }, { data: habitRows }, { data: habitLogRows }] = await Promise.all([
       supabase.from("tasks").select("due_at, status").eq("user_id", userId).not("due_at", "is", null),
       supabase.from("exams").select("title, scheduled_at, status").eq("user_id", userId).eq("status", "programado"),
+      supabase.from("habits").select("id, name, archived_at").eq("user_id", userId),
+      supabase.from("habit_logs").select("habit_id, date, completed").eq("user_id", userId).eq("date", todayStr),
     ]);
 
     const tasks = (taskRows ?? []).map((r) => ({ dueAt: r.due_at, status: r.status as TaskStatus }));
@@ -41,8 +46,10 @@ async function sendDailyReminders(): Promise<{ sent: number; users: number }> {
       scheduledAt: r.scheduled_at,
       status: r.status as ExamStatus,
     }));
+    const habits = (habitRows ?? []).map((r) => ({ id: r.id, name: r.name, archivedAt: r.archived_at }));
+    const habitLogs = (habitLogRows ?? []).map((r) => ({ habitId: r.habit_id, date: r.date, completed: r.completed }));
 
-    const reminder = buildDailyReminder(tasks, exams, now);
+    const reminder = buildDailyReminder({ tasks, exams, habits, habitLogs, now });
     if (!reminder) continue;
 
     const userSubscriptions = subscriptions.filter((s) => s.userId === userId);
