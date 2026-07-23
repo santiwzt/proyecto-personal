@@ -30,6 +30,18 @@ describe("significantTerms", () => {
     expect(terms).not.toContain("es");
     expect(terms).not.toContain("de");
   });
+
+  it("strips the extra function words added to the stopword list", () => {
+    const terms = significantTerms("Nosotros tambien estabamos entre los que hay que analizar sobre el mismo tema");
+    expect(terms).toContain("analizar");
+    expect(terms).toContain("tema");
+    expect(terms).not.toContain("nosotros");
+    expect(terms).not.toContain("tambien");
+    expect(terms).not.toContain("entre");
+    expect(terms).not.toContain("hay");
+    expect(terms).not.toContain("sobre");
+    expect(terms).not.toContain("mismo");
+  });
 });
 
 describe("splitIntoSentences", () => {

@@ -37,9 +37,14 @@ interface KeyTermMatch {
 
 const DEFINITION_PATTERNS: RegExp[] = [
   /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+(?:es|son)\s+/,
-  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+se\s+(?:define|denomina|llama)\s+(?:como\s+)?/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+se\s+(?:define|denomina|llama|conoce)\s+(?:como\s+)?/,
   /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+consiste\s+en\s+/,
   /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+significa\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+corresponde\s+a\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+representa\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+hace\s+referencia\s+a\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+equivale\s+a\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+se\s+caracteriza\s+por\s+/,
 ];
 
 const NUMBER_WITH_UNIT =
@@ -165,6 +170,21 @@ function negateSentence(sentence: string): string | null {
     [/\bpueden\b/, "no pueden"],
     [/\bexiste\b/, "no existe"],
     [/\bexisten\b/, "no existen"],
+    // Real-word antonym swaps: still a genuine sentence about the same
+    // topic, just factually wrong in a specific, checkable way -- not a
+    // vague "no" tacked onto the front.
+    [/\bmayor\b/i, "menor"],
+    [/\bmenor\b/i, "mayor"],
+    [/\baumenta\b/i, "disminuye"],
+    [/\bdisminuye\b/i, "aumenta"],
+    [/\baumentan\b/i, "disminuyen"],
+    [/\bdisminuyen\b/i, "aumentan"],
+    [/\bantes\b/i, "despues"],
+    [/\bdespu[ée]s\b/i, "antes"],
+    [/\bpermite\b/i, "impide"],
+    [/\bimpide\b/i, "permite"],
+    [/\bfavorece\b/i, "dificulta"],
+    [/\bdificulta\b/i, "favorece"],
   ];
   for (const [pattern, replacement] of patterns) {
     if (pattern.test(sentence)) return sentence.replace(pattern, replacement);

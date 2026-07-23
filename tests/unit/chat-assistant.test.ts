@@ -94,6 +94,27 @@ describe("chat-assistant heuristic mode", () => {
     expect(answer.content).toContain("Fisica - tiro vertical.txt");
   });
 
+  it("responds to a plain greeting instead of treating it as a content query", () => {
+    const context = retrieveChatContext(richChunks, richFileNameById, "hola");
+    const answer = buildHeuristicChatAnswer(context, "hola", "explicame", "Fisica");
+    expect(answer.sources).toEqual([]);
+    expect(answer.content.toLowerCase()).toContain("hola");
+    expect(answer.content).toContain("Fisica");
+    expect(answer.content.toLowerCase()).not.toContain("no tengo material");
+  });
+
+  it("responds to a thanks message instead of dumping general study advice", () => {
+    const answer = buildHeuristicChatAnswer([], "Muchas gracias!", "explicame", "Fisica");
+    expect(answer.sources).toEqual([]);
+    expect(answer.content.toLowerCase()).toContain("de nada");
+  });
+
+  it("still treats a real question as content, not as a greeting/thanks", () => {
+    const context = retrieveChatContext(chunks, fileNameById, "¿Qué aceleración tiene el tiro vertical?");
+    const answer = buildHeuristicChatAnswer(context, "aceleracion tiro vertical", "explicame");
+    expect(answer.sources.length).toBeGreaterThan(0);
+  });
+
   it("never fabricates a source name or excerpt that is not present in the chunk content", () => {
     const context = retrieveChatContext(richChunks, richFileNameById, "tiro vertical aceleracion gravedad");
     for (const mode of ["explicame", "resumime", "repaso_rapido", "preparame"] as const) {

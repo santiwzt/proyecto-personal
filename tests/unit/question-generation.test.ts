@@ -118,6 +118,49 @@ describe("generateQuestionsHeuristic", () => {
     }
   });
 
+  it("recognizes the newer definition-shaped sentence patterns", () => {
+    const richChunk: FileChunk = {
+      ...chunk,
+      content:
+        "La inercia corresponde a la resistencia de un cuerpo a cambiar su estado de movimiento. " +
+        "El peso representa la fuerza con la que la gravedad atrae a un cuerpo. " +
+        "La friccion se caracteriza por oponerse siempre al movimiento relativo entre dos superficies.",
+    };
+    const questions = generateQuestionsHeuristic({
+      chunks: [richChunk],
+      topicName: null,
+      difficulty: "media",
+      count: 3,
+      kind: "respuesta_breve",
+    });
+    const prompts = questions.map((q) => q.prompt);
+    expect(prompts.some((p) => p.includes('"La inercia"'))).toBe(true);
+  });
+
+  it("builds antonym-swap false statements that stay real sentences about the topic", () => {
+    const richChunk: FileChunk = {
+      ...chunk,
+      content:
+        "La masa mayor de un planeta aumenta su gravedad superficial. " +
+        "Este efecto permite que los objetos caigan mas rapido antes de tocar el suelo.",
+    };
+    const questions = generateQuestionsHeuristic({
+      chunks: [richChunk],
+      topicName: null,
+      difficulty: "facil",
+      count: 6,
+      kind: "verdadero_falso",
+    });
+    const falseOnes = questions.filter((q) => q.expectedAnswer === "Falso");
+    expect(falseOnes.length).toBeGreaterThan(0);
+    for (const q of falseOnes) {
+      // Every false statement is still grounded in the source sentence
+      // (only the antonym word changed), never a fabricated claim.
+      expect(q.sourceExcerpt).toBeTruthy();
+      expect(q.prompt).not.toBe(`¿Verdadero o falso? ${q.sourceExcerpt}`);
+    }
+  });
+
   it("declines to build a fill-in-blank question when the key term is ambiguous (appears more than once)", () => {
     const ambiguousChunk: FileChunk = {
       ...chunk,

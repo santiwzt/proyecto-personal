@@ -17,6 +17,19 @@ const SPANISH_STOPWORDS = new Set([
   // ("Debe mencionar...", "No debe decir...") but aren't part of the concept
   // being tested — excluding them keeps the overlap score about content.
   "debe", "deben", "mencionar", "decir", "debes", "indicar",
+  // Extra function words -- same rationale as retrieval.ts's stopword list:
+  // they show up in almost every answer regardless of content, so counting
+  // them as "overlap" would inflate the score without the student actually
+  // having covered the concept. Deliberately does NOT include negation words
+  // ("no", "nunca", "sin") -- those flip the meaning of a sentence, so
+  // stripping them would let an answer that says the opposite of what's
+  // expected still score as if it matched.
+  "sus", "esta", "este", "esa", "ese", "eso", "esto", "estos", "estas", "muy",
+  "yo", "tu", "vos", "nosotros", "ustedes", "ellos", "ellas",
+  "me", "te", "le", "nos", "les", "mi", "mis", "tus", "sobre", "entre", "hasta",
+  "desde", "durante", "cada", "otro", "otra", "otros", "otras", "mismo", "misma",
+  "tambien", "hay", "fue", "fueron", "era", "eran", "sera", "seran", "estan",
+  "ser", "estar", "haber", "tener", "todo", "toda", "todos", "todas",
 ]);
 
 /**
@@ -42,8 +55,13 @@ const SYNONYM_CANONICAL: Record<string, string> = {
   baja: "disminuye",
   bajar: "disminuye",
   cae: "disminuye",
+  aumento: "aumenta",
+  disminucion: "disminuye",
+  reduccion: "disminuye",
   explica: "describe",
   explicar: "describe",
+  detalla: "describe",
+  detallar: "describe",
   origina: "causa",
   originar: "causa",
   provoca: "causa",
@@ -52,10 +70,41 @@ const SYNONYM_CANONICAL: Record<string, string> = {
   generar: "causa",
   produce: "causa",
   producir: "causa",
+  ocasiona: "causa",
+  ocasionar: "causa",
   comienza: "inicia",
   empieza: "inicia",
+  empezar: "inicia",
+  comenzar: "inicia",
+  arranca: "inicia",
+  arrancar: "inicia",
   finaliza: "termina",
+  finalizar: "termina",
   concluye: "termina",
+  concluir: "termina",
+  acaba: "termina",
+  acabar: "termina",
+  relevante: "importante",
+  fundamental: "importante",
+  esencial: "importante",
+  clave: "importante",
+  permite: "posibilita",
+  permitir: "posibilita",
+  posibilitar: "posibilita",
+  habilita: "posibilita",
+  evita: "impide",
+  evitar: "impide",
+  impedir: "impide",
+  vincula: "relaciona",
+  vincular: "relaciona",
+  conecta: "relaciona",
+  conectar: "relaciona",
+  asocia: "relaciona",
+  asociar: "relaciona",
+  distingue: "diferencia",
+  distinguir: "diferencia",
+  mejorar: "mejora",
+  empeorar: "empeora",
 };
 
 function canonicalTerm(term: string): string {

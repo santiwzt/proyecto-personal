@@ -18,6 +18,17 @@ const SPANISH_STOPWORDS = new Set([
   "que", "es", "son", "para", "por", "con", "sin", "se", "su", "sus", "al", "lo",
   "como", "mas", "pero", "si", "no", "esta", "este", "esa", "ese", "eso", "muy",
   "que", "cual", "cuales", "porque", "cuando", "donde",
+  // Extra function words that otherwise pollute term-overlap scoring without
+  // carrying any topical meaning of their own.
+  "yo", "tu", "vos", "ella", "nosotros", "ustedes", "ellos", "ellas",
+  "me", "te", "le", "nos", "les", "mi", "mis", "tus", "sobre", "entre", "hasta",
+  "desde", "durante", "mediante", "cada", "otro", "otra", "otros", "otras", "mismo",
+  "misma", "mismos", "mismas", "asi", "solo", "solamente", "aun", "ya", "ademas",
+  "sino", "aunque", "mientras", "aquel", "aquella", "aquellos", "aquellas", "esto",
+  "estos", "estas", "todo", "toda", "todos", "todas", "algo", "algun", "alguna",
+  "algunos", "algunas", "tambien", "tan", "tanto", "tanta", "hay", "fue", "fueron",
+  "era", "eran", "sera", "seran", "estan", "estaba", "estaban", "ser",
+  "estar", "haber", "tener",
 ]);
 
 function stripAccents(text: string): string {

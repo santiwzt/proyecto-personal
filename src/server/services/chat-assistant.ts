@@ -239,6 +239,27 @@ function buildCorregimeBody(context: RetrievedContext[], studentText: string): s
   );
 }
 
+const GREETING_PATTERN =
+  /^(hola+|holis|buenas|buen\s?dia|buenos\s?dias|buenas\s?tardes|buenas\s?noches|hey|que\s?tal|como\s?andas|como\s?va)[\s!¡.,]*$/i;
+const THANKS_PATTERN =
+  /^(gracias|muchas\s?gracias|mil\s?gracias|genial|perfecto|excelente|barbaro|joya|dale|ok|okay|bien|entendido|copiado)[\s!¡.,]*$/i;
+
+function buildGreetingReply(subjectName: string | null): string {
+  const scope = subjectName ? ` de "${subjectName}"` : "";
+  return (
+    `¡Hola! Soy tu asistente de estudio${scope}. Pedime que te explique, resuma o repase algo de tu material ` +
+    "subido, o proba los otros modos: Preguntame (te tira una pregunta de repaso), Repaso rapido, Preparame " +
+    "(arma un plan de repaso) o Corregime (le pasas tu intento de respuesta y te digo que le falta)."
+  );
+}
+
+function buildThanksReply(): string {
+  return (
+    "¡De nada! Cuando quieras seguimos con lo mismo, o cambia de modo arriba para repasar distinto " +
+    "(Preguntame, Repaso rapido, Preparame)."
+  );
+}
+
 /**
  * No-AI-key fallback. Every mode still only uses text copied or directly
  * derived from the user's own material — nothing is invented — but each
@@ -251,6 +272,14 @@ export function buildHeuristicChatAnswer(
   mode: ChatMode,
   subjectName: string | null = null,
 ): { content: string; sources: MessageSource[] } {
+  const trimmedQuery = query.trim();
+  if (GREETING_PATTERN.test(trimmedQuery)) {
+    return { content: buildGreetingReply(subjectName), sources: [] };
+  }
+  if (THANKS_PATTERN.test(trimmedQuery)) {
+    return { content: buildThanksReply(), sources: [] };
+  }
+
   if (context.length === 0) {
     return {
       content: buildGeneralAdvice(subjectName),

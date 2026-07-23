@@ -93,4 +93,37 @@ describe("gradeAnswerHeuristic — respuesta breve", () => {
     const withSynonym = gradeAnswerHeuristic(question, "La velocidad baja durante la subida");
     expect(withSynonym.isCorrect).toBe(true);
   });
+
+  it("recognizes newer synonym pairs (permite/posibilita, vincula/relaciona)", () => {
+    const question: PracticeQuestion = {
+      ...shortAnswerQuestion,
+      id: "q4",
+      prompt: "¿Que hace la fotosintesis?",
+      expectedAnswer: "La fotosintesis posibilita que la planta produzca energia y relaciona la luz con el crecimiento",
+      gradingCriteria: ["Debe mencionar que posibilita la produccion de energia y relaciona la luz con el crecimiento"],
+    };
+    const withSynonyms = gradeAnswerHeuristic(
+      question,
+      "La fotosintesis permite que la planta produzca energia y vincula la luz con el crecimiento",
+    );
+    expect(withSynonyms.isCorrect).toBe(true);
+  });
+
+  it("still treats negation words (no/nunca) as real terms, not stopwords", () => {
+    // Negation words were deliberately excluded from the extra stopwords
+    // added to this module (unlike retrieval.ts's list): stripping them
+    // would let an answer missing the negation still score as if it
+    // covered a criterion built entirely around it.
+    const question: PracticeQuestion = {
+      ...shortAnswerQuestion,
+      id: "q5",
+      prompt: "¿La aceleracion deja de actuar en el punto mas alto?",
+      expectedAnswer: "nunca",
+      gradingCriteria: ["nunca"],
+    };
+    const withNegation = gradeAnswerHeuristic(question, "nunca");
+    const withoutNegation = gradeAnswerHeuristic(question, "algo completamente distinto");
+    expect(withNegation.isCorrect).toBe(true);
+    expect(withoutNegation.isCorrect).toBe(false);
+  });
 });
