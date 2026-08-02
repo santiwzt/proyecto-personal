@@ -126,4 +126,19 @@ describe("gradeAnswerHeuristic — respuesta breve", () => {
     expect(withNegation.isCorrect).toBe(true);
     expect(withoutNegation.isCorrect).toBe(false);
   });
+
+  it("recognizes newer synonym clusters (requiere/necesita, elimina/quita, ventaja/beneficio)", () => {
+    const question: PracticeQuestion = {
+      ...shortAnswerQuestion,
+      id: "q6",
+      prompt: "¿Que ventaja tiene este proceso?",
+      expectedAnswer: "Requiere menos energia y elimina los residuos, lo que es una ventaja importante",
+      gradingCriteria: ["Debe mencionar que necesita menos energia, quita los residuos, y que es un beneficio"],
+    };
+    const withSynonyms = gradeAnswerHeuristic(
+      question,
+      "Necesita menos energia y quita los residuos, lo que es un beneficio importante",
+    );
+    expect(withSynonyms.isCorrect).toBe(true);
+  });
 });

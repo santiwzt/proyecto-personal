@@ -45,6 +45,21 @@ const DEFINITION_PATTERNS: RegExp[] = [
   /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+hace\s+referencia\s+a\s+/,
   /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+equivale\s+a\s+/,
   /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+se\s+caracteriza\s+por\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+se\s+refiere\s+a\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+alude\s+a\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+(?:comprende|abarca|engloba|incluye)\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+(?:implica|supone)\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+se\s+entiende\s+por\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+denota\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+puede\s+definirse\s+como\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+se\s+trata\s+de\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+(?:constituye|conforma)\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+se\s+traduce\s+en\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+se\s+compone\s+de\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+esta\s+(?:formado|formada|constituido|constituida)\s+por\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+se\s+(?:basa|fundamenta)\s+en\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+designa\s+/,
+  /^([A-ZÁÉÍÓÚÑ][\wÁÉÍÓÚÑáéíóúñ\s]{2,40}?)\s+se\s+identifica\s+con\s+/,
 ];
 
 const NUMBER_WITH_UNIT =

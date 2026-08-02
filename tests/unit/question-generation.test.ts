@@ -137,6 +137,25 @@ describe("generateQuestionsHeuristic", () => {
     expect(prompts.some((p) => p.includes('"La inercia"'))).toBe(true);
   });
 
+  it("recognizes the vocabulary-expansion definition patterns (se refiere a, comprende, se basa en)", () => {
+    const richChunk: FileChunk = {
+      ...chunk,
+      content:
+        "La densidad se refiere a la relacion entre la masa de un cuerpo y el volumen que ocupa. " +
+        "El sistema solar comprende al sol y a todos los cuerpos que orbitan a su alrededor. " +
+        "La teoria atomica se basa en la idea de que la materia esta formada por particulas indivisibles.",
+    };
+    const questions = generateQuestionsHeuristic({
+      chunks: [richChunk],
+      topicName: null,
+      difficulty: "media",
+      count: 3,
+      kind: "respuesta_breve",
+    });
+    const prompts = questions.map((q) => q.prompt);
+    expect(prompts.some((p) => p.includes('"La densidad"'))).toBe(true);
+  });
+
   it("builds antonym-swap false statements that stay real sentences about the topic", () => {
     const richChunk: FileChunk = {
       ...chunk,

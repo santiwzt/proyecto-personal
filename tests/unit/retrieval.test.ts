@@ -42,6 +42,28 @@ describe("significantTerms", () => {
     expect(terms).not.toContain("sobre");
     expect(terms).not.toContain("mismo");
   });
+
+  it("strips full ser/estar/haber/tener conjugations, not just the infinitive", () => {
+    const terms = significantTerms(
+      "Habiamos tenido que hubieramos permanecido presentes cuando seriamos convocados para el experimento",
+    );
+    expect(terms).toContain("permanecido");
+    expect(terms).toContain("presentes");
+    expect(terms).toContain("convocados");
+    expect(terms).toContain("experimento");
+    expect(terms).not.toContain("habiamos");
+    expect(terms).not.toContain("tenido");
+    expect(terms).not.toContain("hubieramos");
+    expect(terms).not.toContain("seriamos");
+  });
+
+  it("keeps 'estado'/'estados' as content words instead of stripping them as estar's participle", () => {
+    // "estado" doubles as a common noun in this app's subjects (states of
+    // matter in physics/chemistry, "el Estado" in history/civics) -- worth
+    // more as a real term than as a stopword.
+    const terms = significantTerms("El agua cambia de estado segun la temperatura del sistema");
+    expect(terms).toContain("estado");
+  });
 });
 
 describe("splitIntoSentences", () => {

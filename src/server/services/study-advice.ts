@@ -27,19 +27,61 @@ export type SubjectCategory =
   | "general";
 
 const CATEGORY_KEYWORDS: Record<Exclude<SubjectCategory, "general">, string[]> = {
-  matematica: ["matematic", "algebra", "geometri", "calculo", "trigonometri", "analisis matematico"],
-  fisica: ["fisica"],
-  quimica: ["quimic"],
-  biologia: ["biologi", "anatomia", "botanica"],
-  historia: ["historia"],
-  geografia: ["geografia"],
-  lengua: ["lengua", "literatura", "practicas del lenguaje"],
-  idiomas: ["ingles", "frances", "portugues", "italiano", "aleman", "idioma"],
-  economia: ["economia", "contabilidad", "administracion"],
-  arte: ["arte", "musica", "plastica", "dibujo"],
-  educacion_fisica: ["educacion fisica", "gimnasia"],
-  programacion: ["programacion", "informatica", "computacion", "sistemas"],
-  filosofia: ["filosofia", "psicologia", "sociologia"],
+  matematica: [
+    "matematic", "algebra", "geometri", "calculo", "trigonometri",
+    "analisis matematico", "aritmetica", "estadistica", "probabilidad",
+  ],
+  fisica: [
+    "fisica", "mecanica", "electromagnetismo", "termodinamica", "optica",
+    "cinematica", "dinamica", "electricidad", "biofisica", "astronomia",
+    "electrotecnia",
+  ],
+  quimica: [
+    "quimic", "bioquimica", "laboratorio quimico",
+  ],
+  biologia: [
+    "biologi", "anatomia", "botanica", "fisiologia", "genetica", "ecologia",
+    "zoologia", "microbiologia", "evolucion", "ciencias naturales",
+  ],
+  historia: [
+    "historia", "historiografia", "ciencias sociales",
+  ],
+  geografia: [
+    "geografia", "geopolitica", "cartografia", "ciencias de la tierra",
+  ],
+  lengua: [
+    "lengua", "literatura", "practicas del lenguaje", "gramatica",
+    "ortografia", "redaccion", "taller de lectura y escritura",
+  ],
+  idiomas: [
+    "ingles", "frances", "portugues", "italiano", "aleman", "idioma",
+    "lenguas extranjeras", "english",
+  ],
+  economia: [
+    "economia", "contabilidad", "administracion", "gestion organizacional",
+    "marketing", "finanzas", "organizacion empresarial", "comercializacion",
+    "sistemas de informacion contable", "costos",
+  ],
+  arte: [
+    "arte", "musica", "plastica", "dibujo", "artes visuales",
+    "educacion artistica", "teatro", "danza", "ceramica", "coro",
+    "escenografia",
+  ],
+  educacion_fisica: [
+    "educacion fisica", "gimnasia", "deporte", "atletismo", "natacion",
+    "vida en la naturaleza", "recreacion",
+  ],
+  programacion: [
+    "programacion", "informatica", "computacion", "sistemas", "robotica",
+    "desarrollo de software", "base de datos", "algoritmos",
+    "ciencia de datos",
+  ],
+  filosofia: [
+    "filosofia", "psicologia", "sociologia", "formacion etica y ciudadana",
+    "etica", "construccion de ciudadania", "antropologia", "logica",
+    "gnoseologia", "teoria del conocimiento", "derechos humanos",
+    "epistemologia",
+  ],
 };
 
 const TIPS: Record<SubjectCategory, string[]> = {

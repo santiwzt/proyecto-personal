@@ -13,22 +13,73 @@ import type { FileChunk } from "@/types/domain";
  * transparent, and requires zero infrastructure.
  */
 
+// Comprehensive Spanish stopword list (function words with no topical
+// content of their own), based on the standard Snowball/NLTK Spanish
+// stopword set -- includes the full ser/estar/haber/tener paradigms so a
+// query or source sentence using any tense of those verbs doesn't skew
+// term-overlap scoring. Kept in one flat set (not deduped by hand) so it's
+// easy to diff against the source list if it needs updating later.
 const SPANISH_STOPWORDS = new Set([
+  // Core function words: articles, prepositions, conjunctions.
   "el", "la", "los", "las", "un", "una", "unos", "unas", "de", "del", "en", "y", "o",
-  "que", "es", "son", "para", "por", "con", "sin", "se", "su", "sus", "al", "lo",
-  "como", "mas", "pero", "si", "no", "esta", "este", "esa", "ese", "eso", "muy",
-  "que", "cual", "cuales", "porque", "cuando", "donde",
-  // Extra function words that otherwise pollute term-overlap scoring without
-  // carrying any topical meaning of their own.
-  "yo", "tu", "vos", "ella", "nosotros", "ustedes", "ellos", "ellas",
-  "me", "te", "le", "nos", "les", "mi", "mis", "tus", "sobre", "entre", "hasta",
-  "desde", "durante", "mediante", "cada", "otro", "otra", "otros", "otras", "mismo",
-  "misma", "mismos", "mismas", "asi", "solo", "solamente", "aun", "ya", "ademas",
-  "sino", "aunque", "mientras", "aquel", "aquella", "aquellos", "aquellas", "esto",
-  "estos", "estas", "todo", "toda", "todos", "todas", "algo", "algun", "alguna",
-  "algunos", "algunas", "tambien", "tan", "tanto", "tanta", "hay", "fue", "fueron",
-  "era", "eran", "sera", "seran", "estan", "estaba", "estaban", "ser",
-  "estar", "haber", "tener",
+  "e", "u", "a", "al", "que", "para", "por", "con", "sin", "sobre", "entre", "hasta",
+  "desde", "durante", "mediante", "contra", "ante", "cual", "cuales", "quien",
+  "quienes", "cuando", "donde", "porque", "como", "mas", "pero", "sino", "aunque",
+  "mientras", "ni",
+  // Negation/adverb/quantifier words -- kept here since retrieval only needs
+  // approximate topical overlap, not exact-meaning grading (see grading.ts,
+  // which deliberately excludes negation words for the opposite reason).
+  "si", "no", "nunca", "jamas", "tampoco", "muy", "tan", "tanto", "tanta",
+  "tambien", "asi", "solo", "solamente", "aun", "todavia", "ya", "ademas",
+  "incluso", "apenas", "casi", "quiza", "quizas", "bastante", "demasiado",
+  "siempre", "aqui", "ahi", "alli", "aca", "alla", "ahora", "entonces", "luego",
+  "despues", "antes", "nada", "mucho", "muchos", "poco", "cuanto", "cuanta",
+  "cuantos", "cuantas",
+  // Pronouns and possessives.
+  "yo", "tu", "vos", "el", "ella", "nosotros", "nosotras", "vosotros", "vosotras",
+  "ustedes", "ellos", "ellas", "me", "te", "le", "lo", "la", "nos", "os", "les",
+  "se", "mi", "mis", "tus", "su", "sus", "mio", "mia", "mios", "mias", "tuyo",
+  "tuya", "tuyos", "tuyas", "ti",
+  // Demonstratives and indefinites.
+  "este", "esta", "esa", "ese", "eso", "esto", "estos", "estas", "esos", "esas",
+  "aquel", "aquella", "aquellos", "aquellas", "todo", "toda", "todos", "todas",
+  "otro", "otra", "otros", "otras", "mismo", "misma", "mismos", "mismas", "algo",
+  "algun", "alguna", "algunos", "algunas", "uno", "unos",
+  // Full ser/estar/haber/tener paradigms -- present, preterite, imperfect,
+  // future, conditional, subjunctive, gerund/participle.
+  "ser", "soy", "eres", "es", "somos", "sois", "son", "sea", "seas", "seamos",
+  "seais", "sean", "sere", "seras", "sera", "seremos", "sereis", "seran",
+  "seria", "serias", "seriamos", "seriais", "serian", "era", "eras", "eramos",
+  "erais", "eran", "fui", "fuiste", "fue", "fuimos", "fuisteis", "fueron",
+  "fuera", "fueras", "fueramos", "fuerais", "fueran", "fuese", "fueses",
+  "fuesemos", "fueseis", "fuesen", "siendo", "sido",
+  "estar", "estoy", "estas", "esta", "estamos", "estais", "estan", "estes",
+  "estemos", "esteis", "esten", "estare", "estaras", "estara", "estaremos",
+  "estareis", "estaran", "estaria", "estarias", "estariamos", "estariais",
+  "estarian", "estaba", "estabas", "estabamos", "estabais", "estaban",
+  "estuve", "estuviste", "estuvo", "estuvimos", "estuvisteis", "estuvieron",
+  "estuviera", "estuvieras", "estuvieramos", "estuvierais", "estuvieran",
+  "estuviese", "estuvieses", "estuviesemos", "estuvieseis", "estuviesen",
+  "estando",
+  // NOT "estado"/"estados": besides being estar's participle, they're
+  // common content nouns in this app's subjects ("estado solido", "el
+  // Estado" in civics/history) -- stripping them would hurt precision more
+  // than the participle sense would help.
+  "haber", "he", "has", "ha", "hemos", "han", "haya", "hayas", "hayamos",
+  "hayais", "hayan", "habre", "habras", "habra", "habremos", "habreis",
+  "habran", "habria", "habrias", "habriamos", "habriais", "habrian", "habia",
+  "habias", "habiamos", "habiais", "habian", "hube", "hubiste", "hubo",
+  "hubimos", "hubisteis", "hubieron", "hubiera", "hubieras", "hubieramos",
+  "hubierais", "hubieran", "hubiese", "hubieses", "hubiesemos", "hubieseis",
+  "hubiesen", "habiendo", "habido", "habida", "habidos", "habidas", "hay",
+  "tener", "tengo", "tienes", "tiene", "tenemos", "teneis", "tienen", "tenga",
+  "tengas", "tengamos", "tengais", "tengan", "tendre", "tendras", "tendra",
+  "tendremos", "tendreis", "tendran", "tendria", "tendrias", "tendriamos",
+  "tendriais", "tendrian", "tenia", "tenias", "teniamos", "teniais", "tenian",
+  "tuve", "tuviste", "tuvo", "tuvimos", "tuvisteis", "tuvieron", "tuviera",
+  "tuvieras", "tuvieramos", "tuvierais", "tuvieran", "tuviese", "tuvieses",
+  "tuviesemos", "tuvieseis", "tuviesen", "teniendo", "tenido", "tenida",
+  "tenidos", "tenidas",
 ]);
 
 function stripAccents(text: string): string {

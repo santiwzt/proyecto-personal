@@ -15,7 +15,13 @@ describe("inferSubjectCategory", () => {
   });
 
   it("falls back to general for a subject with no matching keyword", () => {
-    expect(inferSubjectCategory("Taller de Robotica Avanzada 3000")).toBe("general");
+    expect(inferSubjectCategory("Orientacion y Tutoria")).toBe("general");
+  });
+
+  it("recognizes subjects via the expanded keyword lists", () => {
+    expect(inferSubjectCategory("Taller de Robotica")).toBe("programacion");
+    expect(inferSubjectCategory("Derechos Humanos y Ciudadania")).toBe("filosofia");
+    expect(inferSubjectCategory("Contabilidad y Gestion")).toBe("economia");
   });
 });
 
