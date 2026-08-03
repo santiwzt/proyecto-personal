@@ -9,6 +9,7 @@ import {
   Target,
   Dumbbell,
   Wallet,
+  Lightbulb,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -23,6 +24,7 @@ export const navItems: NavItem[] = [
   { label: "Hoy", href: "/hoy", icon: Home },
   { label: "Agenda", href: "/agenda", icon: Calendar },
   { label: "Estudios", href: "/estudios", icon: BookOpen },
+  { label: "Metodos", href: "/metodos", icon: Lightbulb },
   { label: "Proyectos", href: "/proyectos", icon: FolderKanban },
   { label: "Archivos", href: "/archivos", icon: FileText },
   { label: "Asistente", href: "/asistente", icon: Sparkles },
@@ -33,10 +35,10 @@ export const navItems: NavItem[] = [
   { label: "Configuracion", href: "/configuracion", icon: Settings },
 ];
 
-/** Subset shown in the mobile bottom nav; the rest live behind "Mas". */
-export const mobilePrimaryNavItems: NavItem[] = [
-  navItems[0]!,
-  navItems[1]!,
-  navItems[2]!,
-  navItems[5]!,
-];
+/** Subset shown in the mobile bottom nav; the rest live behind "Mas". Looked
+ * up by href (not array position) so reordering/inserting navItems above
+ * can't silently swap which ones show up here. */
+const MOBILE_PRIMARY_HREFS = ["/hoy", "/agenda", "/estudios", "/asistente"];
+export const mobilePrimaryNavItems: NavItem[] = MOBILE_PRIMARY_HREFS.map(
+  (href) => navItems.find((item) => item.href === href)!,
+);
