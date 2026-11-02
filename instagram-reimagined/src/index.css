@@ -1,0 +1,140 @@
+@import "@fontsource-variable/inter";
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: 250 250 247;
+    --surface: 255 255 255;
+    --surface-2: 243 243 239;
+    --ink: 17 17 17;
+    --ink-2: 92 92 88;
+    --ink-3: 148 148 142;
+    --line: 17 17 17;
+    --calm: 52 116 98;
+    --calm-soft: 226 239 233;
+    color-scheme: light;
+  }
+
+  .dark {
+    --bg: 11 11 12;
+    --surface: 22 22 24;
+    --surface-2: 32 32 35;
+    --ink: 244 244 242;
+    --ink-2: 168 168 162;
+    --ink-3: 112 112 108;
+    --line: 255 255 255;
+    --calm: 124 196 174;
+    --calm-soft: 24 46 40;
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
+
+  body {
+    @apply bg-bg text-ink font-sans;
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background: rgb(var(--calm) / 0.25);
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--calm));
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+@layer components {
+  .hairline {
+    border-color: rgb(var(--line) / 0.08);
+  }
+  .hairline-strong {
+    border-color: rgb(var(--line) / 0.14);
+  }
+  .card {
+    @apply rounded-3xl border bg-surface shadow-soft;
+    border-color: rgb(var(--line) / 0.07);
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3;
+  }
+  .display {
+    @apply font-display font-normal tracking-tight;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-[transform,background-color,color,box-shadow] duration-200 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40;
+  }
+  .btn-primary {
+    @apply btn bg-ink text-bg hover:bg-ink/85;
+  }
+  .btn-ghost {
+    @apply btn border text-ink hover:bg-surface-2;
+    border-color: rgb(var(--line) / 0.12);
+  }
+  .btn-calm {
+    @apply btn bg-calm text-white hover:bg-calm/90 dark:text-[#0B0B0C];
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors;
+    border-color: rgb(var(--line) / 0.1);
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  .ig-text {
+    background: linear-gradient(90deg, #f58529, #dd2a7b 50%, #8134af);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .ring-story {
+    background: conic-gradient(from 210deg, #f58529, #dd2a7b, #8134af, #515bd4, #f58529);
+  }
+  .grain {
+    background-image: radial-gradient(rgb(var(--line) / 0.035) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+}
+
+/* "Modo bienestar": interfaz más tranquila dentro del teléfono simulado. */
+.calm-ui .media {
+  filter: saturate(0.72) contrast(0.96);
+}
+.calm-ui .ring-story {
+  background: rgb(var(--calm) / 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

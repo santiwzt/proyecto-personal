@@ -44,6 +44,7 @@
     "node_modules",
     ".next",
     "playwright-report",
-    "test-results"
+    "test-results",
+    "instagram-reimagined"
   ]
 }

@@ -75,3 +75,24 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  instagram-reimagined:
+    name: Instagram Reimaginado (typecheck, tests, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: instagram-reimagined
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: instagram-reimagined/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck, tests, build
+        run: npm run check

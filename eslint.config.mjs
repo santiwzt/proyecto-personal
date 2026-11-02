@@ -11,6 +11,8 @@ const eslintConfig = [
       "coverage/**",
       "supabase/.branches/**",
       "supabase/.temp/**",
+      // Proyecto independiente (Vite) con su propio tooling: ver docs/decisions/0008.
+      "instagram-reimagined/**",
     ],
   },
   {
