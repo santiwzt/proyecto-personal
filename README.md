@@ -253,3 +253,11 @@ Ver [ROADMAP.md](./ROADMAP.md).
 ## Como contribuir
 
 Ver [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+## Otro proyecto en este repo: Instagram Reimaginado
+
+La carpeta [`instagram-reimagined/`](./instagram-reimagined) contiene un
+proyecto independiente (trabajo escolar "Rediseñar una app desde la ética"):
+una simulación interactiva de Instagram antes/después centrada en el
+bienestar digital. Tiene su propio `package.json` y README; ver
+[docs/decisions/0008](./docs/decisions/0008-instagram-reimagined-standalone-app.md).
