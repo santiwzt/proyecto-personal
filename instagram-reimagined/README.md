@@ -81,6 +81,8 @@ src/
 
 ## Publicarlo
 
+**GitHub Pages (ya configurado):** el workflow `.github/workflows/pages.yml` compila y publica la app cada vez que cambia algo de esta carpeta en `main`. Queda en https://santiwzt.github.io/proyecto-personal/. Requisito, una sola vez: en GitHub, *Settings → Pages → Build and deployment → Source* tiene que estar en **GitHub Actions** (no "Deploy from a branch").
+
 Es un sitio estático: `npm run build` genera la carpeta `dist/`. En Vercel, creá un proyecto con *Root Directory* `instagram-reimagined`, comando `npm run build` y salida `dist`.
 
 ## Aclaración
